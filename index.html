@@ -1,0 +1,1278 @@
+<!DOCTYPE html>
+<html lang="bn" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>CineStream - Plyr Movie Player with Auto-Landscape</title>
+
+  <!-- Google Font: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Plyr CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.css" />
+
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <style>
+    /* Reset & Pure Lightweight CSS */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #080b11;
+      color: #e2e8f0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      scroll-behavior: smooth;
+    }
+
+    /* Custom Plyr Theme Tweaks */
+    :root {
+      --plyr-color-main: #e50914;
+      --plyr-video-background: #000;
+      --plyr-video-controls-background: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.9));
+      --plyr-badge-text-color: #ffffff;
+      --plyr-control-radius: 8px;
+    }
+
+    .plyr--video {
+      border-radius: 12px;
+      overflow: hidden;
+      background-color: #000000;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.9);
+      width: 100%;
+      height: 100%;
+    }
+
+    .plyr:-webkit-full-screen {
+      width: 100% !important;
+      height: 100% !important;
+    }
+    .plyr:-moz-full-screen {
+      width: 100% !important;
+      height: 100% !important;
+    }
+    .plyr:fullscreen {
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    @media all and (orientation: portrait) {
+      .plyr.plyr--fullscreen {
+        width: 100vh !important;
+        height: 100vw !important;
+        max-width: none !important;
+        max-height: none !important;
+        transform: rotate(90deg);
+        transform-origin: bottom left;
+        position: fixed !important;
+        top: 100% !important;
+        left: 0 !important;
+        margin: 0 !important;
+        z-index: 2147483647;
+      }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0b0f19;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #243049;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #e50914;
+    }
+
+    /* Header */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(10, 13, 20, 0.95);
+      border-bottom: 1px solid #1f293d;
+      backdrop-filter: blur(10px);
+    }
+    .header-top {
+      max-width: 1300px;
+      margin: 0 auto;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .brand-icon {
+      width: 38px;
+      height: 38px;
+      background: linear-gradient(135deg, #e50914, #ff2a3b);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 15px;
+      box-shadow: 0 4px 15px rgba(229, 9, 20, 0.4);
+    }
+    .brand-text h1 {
+      font-size: 18px;
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -0.5px;
+    }
+    .brand-text span {
+      color: #e50914;
+    }
+    .brand-text p {
+      font-size: 9px;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .search-box {
+      flex: 1;
+      max-width: 450px;
+      position: relative;
+    }
+    .search-box i.fa-magnifying-glass {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #64748b;
+      font-size: 13px;
+    }
+    .search-box input {
+      width: 100%;
+      background: #111827;
+      border: 1px solid #1f293d;
+      border-radius: 50px;
+      padding: 9px 36px 9px 38px;
+      font-size: 13px;
+      color: #fff;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+    .search-box input:focus {
+      border-color: #e50914;
+      box-shadow: 0 0 0 2px rgba(229, 9, 20, 0.2);
+    }
+    .clear-btn {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: #64748b;
+      cursor: pointer;
+      display: none;
+      font-size: 13px;
+    }
+
+    /* Category Navigation */
+    .cat-nav {
+      max-width: 1300px;
+      margin: 0 auto;
+      padding: 8px 16px;
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      border-top: 1px solid rgba(31, 41, 61, 0.5);
+    }
+    .cat-nav::-webkit-scrollbar {
+      display: none;
+    }
+    .cat-btn {
+      flex-shrink: 0;
+      background: #111827;
+      border: 1px solid #1f293d;
+      color: #94a3b8;
+      padding: 6px 14px;
+      border-radius: 50px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .cat-btn.active {
+      background: #e50914;
+      border-color: #e50914;
+      color: #fff;
+      box-shadow: 0 2px 10px rgba(229, 9, 20, 0.35);
+    }
+
+    /* Main Container */
+    main {
+      flex: 1;
+      max-width: 1300px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Player Section */
+    .player-section {
+      background: #0f1523;
+      border: 1px solid #1f293d;
+      border-radius: 16px;
+      padding: 16px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      scroll-margin-top: 110px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    }
+    @media (min-width: 960px) {
+      .player-section {
+        grid-template-columns: 7fr 5fr;
+      }
+    }
+
+    .player-left {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .video-wrapper {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16/9;
+      background: #000;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid #1f293d;
+    }
+    .video-loader {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      z-index: 10;
+    }
+    .spinner {
+      width: 36px;
+      height: 36px;
+      border: 3px solid rgba(229, 9, 20, 0.3);
+      border-top-color: #e50914;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .stream-status-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #090d15;
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid #1a2233;
+      font-size: 11px;
+      color: #94a3b8;
+    }
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      background: #10b981;
+      border-radius: 50%;
+    }
+    .player-actions {
+      display: flex;
+      gap: 12px;
+    }
+    .player-actions button {
+      background: none;
+      border: none;
+      color: #94a3b8;
+      cursor: pointer;
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .player-actions button:hover {
+      color: #fff;
+    }
+
+    /* Player Details Side */
+    .player-right {
+      background: #090d15;
+      border: 1px solid #1a2233;
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-height: 480px;
+      overflow-y: auto;
+    }
+    .meta-badges {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .cat-tag {
+      font-size: 10px;
+      font-weight: 700;
+      color: #e50914;
+      background: rgba(229, 9, 20, 0.15);
+      border: 1px solid rgba(229, 9, 20, 0.3);
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+    .rating-tag {
+      font-size: 10px;
+      font-weight: 700;
+      color: #fbbf24;
+      background: rgba(251, 191, 36, 0.12);
+      border: 1px solid rgba(251, 191, 36, 0.3);
+      padding: 3px 8px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .movie-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #ffffff;
+      line-height: 1.3;
+    }
+    .movie-cast {
+      font-size: 12px;
+      color: #94a3b8;
+      line-height: 1.5;
+    }
+    .movie-cast strong {
+      color: #cbd5e1;
+    }
+
+    /* Episodes Section */
+    .episodes-wrapper {
+      margin-top: 6px;
+      padding-top: 12px;
+      border-top: 1px solid #1a2233;
+      display: none;
+    }
+    .episodes-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #cbd5e1;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .episodes-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 6px;
+      max-height: 180px;
+      overflow-y: auto;
+    }
+    .ep-btn {
+      background: #111827;
+      border: 1px solid #1f293d;
+      color: #cbd5e1;
+      padding: 8px 10px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 600;
+      text-align: left;
+      cursor: pointer;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      transition: all 0.2s;
+    }
+    .ep-btn.active {
+      background: #e50914;
+      border-color: #e50914;
+      color: #fff;
+    }
+
+    /* Title Bar */
+    .section-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      border-bottom: 1px solid #1f293d;
+      padding-bottom: 10px;
+    }
+    .section-bar h2 {
+      font-size: 17px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-bar select {
+      background: #111827;
+      border: 1px solid #1f293d;
+      color: #cbd5e1;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 11px;
+      outline: none;
+    }
+
+    /* Movies Grid */
+    .movie-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+    @media (min-width: 500px) {
+      .movie-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 14px;
+      }
+    }
+    @media (min-width: 768px) {
+      .movie-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+    @media (min-width: 1024px) {
+      .movie-grid {
+        grid-template-columns: repeat(6, 1fr);
+      }
+    }
+
+    /* Movie Card */
+    .card {
+      background: #0f1523;
+      border: 1px solid #1a2233;
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      cursor: pointer;
+      position: relative;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .card:active {
+      transform: scale(0.97);
+    }
+    .poster-wrap {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 2/3;
+      background: #090d15;
+      overflow: hidden;
+    }
+    .poster-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      background-color: #111827;
+      transition: opacity 0.3s ease;
+    }
+    .badge-cat {
+      position: absolute;
+      top: 6px;
+      left: 6px;
+      background: rgba(0, 0, 0, 0.8);
+      font-size: 9px;
+      font-weight: 700;
+      color: #fff;
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      max-width: 80%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .badge-rating {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      background: rgba(0, 0, 0, 0.85);
+      font-size: 9px;
+      font-weight: 800;
+      color: #fbbf24;
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid rgba(251, 191, 36, 0.3);
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+    .badge-series {
+      position: absolute;
+      bottom: 6px;
+      left: 6px;
+      background: #e50914;
+      color: #fff;
+      font-size: 8px;
+      font-weight: 800;
+      text-transform: uppercase;
+      padding: 2px 6px;
+      border-radius: 4px;
+      letter-spacing: 0.5px;
+    }
+    .card-info {
+      padding: 9px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .card-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #f1f5f9;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .card-cast {
+      font-size: 10px;
+      color: #64748b;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Auto Pre-fetch Sentinel */
+    #scrollSentinel {
+      width: 100%;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 10px;
+    }
+    .scroll-loader {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      color: #94a3b8;
+    }
+
+    /* Toast */
+    #toast {
+      position: fixed;
+      bottom: 16px;
+      right: 16px;
+      background: #111827;
+      border: 1px solid #e50914;
+      color: #fff;
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-size: 11px;
+      z-index: 999;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s ease;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.8);
+    }
+    #toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    /* Empty state */
+    .empty-state {
+      display: none;
+      text-align: center;
+      padding: 50px 20px;
+      color: #94a3b8;
+    }
+    .empty-state i {
+      font-size: 32px;
+      margin-bottom: 10px;
+      color: #475569;
+    }
+
+    footer {
+      border-top: 1px solid #1f293d;
+      padding: 16px;
+      text-align: center;
+      font-size: 11px;
+      color: #64748b;
+      margin-top: auto;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- INLINE SVG SPRITE TO PREVENT CROSS-ORIGIN HOST SECURITY ERRORS IN WEBVIEW -->
+  <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+    <symbol id="plyr-play" viewBox="0 0 18 18"><path d="M6 3.5v11l9-5.5-9-5.5z"/></symbol>
+    <symbol id="plyr-pause" viewBox="0 0 18 18"><path d="M6 3.5h2.5v11H6zm3.5 0h2.5v11H9.5z"/></symbol>
+    <symbol id="plyr-restart" viewBox="0 0 18 18"><path d="M9.7 1.2l.7 2.1-2.1.7c-2.4.8-4 3-4 5.6 0 3.3 2.7 6 6 6s6-2.7 6-6c0-1.8-.8-3.4-2.1-4.5l1.4-1.4C17.2 5.1 18.2 7.2 18.2 9.6c0 4.4-3.6 8-8 8s-8-3.6-8-8c0-3.5 2.2-6.5 5.5-7.5l-.7-2.1L9.7 1.2z"/></symbol>
+    <symbol id="plyr-rewind" viewBox="0 0 18 18"><path d="M9 4.5l-6 4.5 6 4.5V10h6V8H9V4.5z"/></symbol>
+    <symbol id="plyr-fast-forward" viewBox="0 0 18 18"><path d="M9 13.5l6-4.5-6-4.5V8H3v2h6v3.5z"/></symbol>
+    <symbol id="plyr-volume" viewBox="0 0 18 18"><path d="M15.6 3.3c-.4-.4-1-.4-1.4 0s-.4 1 0 1.4C15.4 5.9 16 7.9 16 10s-.6 4.1-1.8 5.3c-.4.4-.4 1 0 1.4.2.2.5.3.7.3s.5-.1.7-.3C17.2 15.1 18 12.6 18 10s-.8-5.1-2.4-6.7zM12 6.5c-.4-.4-1-.4-1.4 0s-.4 1 0 1.4C11.3 8.6 11.7 9.3 11.7 10s-.4 1.4-1.1 2.1c-.4.4-.4 1 0 1.4.2.2.5.3.7.3s.5-.1.7-.3c1.1-1.1 1.7-2.3 1.7-3.5s-.6-2.4-1.7-3.5zM2 7v6h3l4 4V3L5 7H2z"/></symbol>
+    <symbol id="plyr-muted" viewBox="0 0 18 18"><path d="M12.4 12.5l2.1-2.1 2.1 2.1 1.4-1.4-2.1-2.1 2.1-2.1-1.4-1.4-2.1 2.1-2.1-2.1-1.4 1.4 2.1 2.1-2.1 2.1 1.4 1.4zM2 7v6h3l4 4V3L5 7H2z"/></symbol>
+    <symbol id="plyr-settings" viewBox="0 0 18 18"><path d="M16.5 10.5c-.1-.3-.2-.6-.2-.9.1-.3.2-.6.2-.9l1.4-.9c.2-.1.2-.4.1-.6l-1.3-2.3c-.1-.2-.3-.3-.6-.2l-1.6.6c-.4-.3-.8-.6-1.3-.8l-.3-1.7C12.9 2.6 12.7 2.4 12.5 2.4h-2.6c-.2 0-.4.2-.4.4l-.3 1.7c-.5.2-.9.5-1.3.8l-1.6-.6c-.2-.1-.5 0-.6.2L4.4 7.2c-.1.2-.1.5.1.6l1.4.9c0 .3-.1.6-.1.9s.1.6.1.9l-1.4.9c-.2.1-.2.4-.1.6l1.3 2.3c.1.2.3.3.6.2l1.6-.6c-.4.3.8.6 1.3.8l.3 1.7c0 .2.2.4.4.4h2.6c.2 0 .4-.2.4-.4l.3-1.7c.5-.2.9-.5 1.3-.8l1.6.6c.2.1.5 0 .6-.2l1.3-2.3c.1-.2.1-.5-.1-.6l-1.4-.9zM9 11.5c-1.4 0-2.5-1.1-2.5-2.5s1.1-2.5 2.5-2.5 2.5 1.1 2.5 2.5-1.1 2.5-2.5 2.5z"/></symbol>
+    <symbol id="plyr-pip" viewBox="0 0 18 18"><path d="M15 2H3a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zm0 12H3V4h12v10zm-1-5H9a1 1 0 0 0-1 1v3a1 1 0 0 0 1 1h5a1 1 0 0 0 1-1v-3a1 1 0 0 0-1-1z"/></symbol>
+    <symbol id="plyr-enter-fullscreen" viewBox="0 0 18 18"><path d="M10 3h5v5h-2V5h-3V3zm3 10h2v-3h2v5h-5v-2zM3 8V3h5v2H5v3H3zm2 5H3v-3H1v5h5v-2H5z"/></symbol>
+    <symbol id="plyr-exit-fullscreen" viewBox="0 0 18 18"><path d="M13 8h4V6h-2V3h-2v5zm-5 5H6v2H3v-2H1v4h7v-4zm0-7H6V3H3v2H1V1h7v5zm5 7h4v2h-2v3h-2v-5z"/></symbol>
+  </svg>
+
+  <!-- Sticky Header -->
+  <header>
+    <div class="header-top">
+      <a href="#" class="brand">
+        <div class="brand-icon"><i class="fa-solid fa-play"></i></div>
+        <div class="brand-text">
+          <h1>Cine<span>Stream</span></h1>
+          <p>Super Fast Player</p>
+        </div>
+      </a>
+
+      <!-- Search Input -->
+      <div class="search-box">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="searchInput" placeholder="মুভি বা অভিনেতার নাম খুঁজুন..." autocomplete="off" />
+        <button id="clearSearch" class="clear-btn"><i class="fa-solid fa-circle-xmark"></i></button>
+      </div>
+    </div>
+
+    <!-- Category Filters -->
+    <div class="cat-nav" id="categoryContainer">
+      <button class="cat-btn active">সকল ক্যাটাগরি</button>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main>
+    <!-- VIDEO PLAYER SECTION -->
+    <section id="playerSection" class="player-section">
+      <!-- Player Left -->
+      <div class="player-left">
+        <div class="video-wrapper">
+          <video id="player" playsinline controls></video>
+          <div id="playerLoader" class="video-loader" style="display: none;">
+            <div class="spinner"></div>
+            <span style="font-size: 11px; color: #cbd5e1;">স্ট্রিম লোড হচ্ছে...</span>
+          </div>
+        </div>
+
+        <div class="stream-status-bar">
+          <div class="status-badge">
+            <span class="status-dot"></span>
+            <span>Cloudflare Stream Worker</span>
+          </div>
+          <div class="player-actions">
+            <button id="directStreamBtn" title="সরাসরি খুলুন">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i> সরাসরি
+            </button>
+            <button id="copyUrlBtn" title="লিঙ্ক কপি করুন">
+              <i class="fa-regular fa-copy"></i> কপি
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Player Right (Meta Info & Episodes) -->
+      <div class="player-right">
+        <div class="meta-badges">
+          <span id="currentCategory" class="cat-tag">Movie</span>
+          <span id="currentRating" class="rating-tag"><i class="fa-solid fa-star"></i> 0.0</span>
+        </div>
+        <h2 id="currentTitle" class="movie-title">একটি মুভি সিলেক্ট করুন</h2>
+        <p id="currentCast" class="movie-cast"><strong>অভিনয়শিল্পী:</strong> তালিকা থেকে একটি মুভিতে ক্লিক করুন।</p>
+
+        <!-- Web Series Episodes -->
+        <div id="episodesSection" class="episodes-wrapper">
+          <div class="episodes-title">
+            <span><i class="fa-solid fa-list-ol" style="color: #e50914;"></i> পর্বসমূহ (Episodes)</span>
+            <span id="episodeCountBadge" style="color: #94a3b8; font-size: 10px;"></span>
+          </div>
+          <div id="episodesGrid" class="episodes-grid"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Movies Grid Section -->
+    <div class="section-bar">
+      <h2><i class="fa-solid fa-film" style="color: #e50914;"></i> <span id="sectionHeading">সিনেমা ও সিরিজ</span></h2>
+      <select id="sortSelect">
+        <option value="default">ডিফল্ট ক্রমানুযায়ী</option>
+        <option value="random">র‍্যান্ডম (Random)</option>
+        <option value="rating-desc">সর্বোচ্চ রেটিং</option>
+        <option value="title-asc">নাম (A to Z)</option>
+      </select>
+    </div>
+
+    <!-- Movie Cards Container -->
+    <div id="movieGrid" class="movie-grid"></div>
+
+    <!-- Empty Results -->
+    <div id="noResults" class="empty-state">
+      <i class="fa-solid fa-film-slash"></i>
+      <h3>কোনো ফলাফল পাওয়া যায়নি</h3>
+      <p style="font-size: 12px; margin-top: 4px;">অন্য কোনো নাম দিয়ে সার্চ করুন।</p>
+    </div>
+
+    <!-- Infinite Auto-Scroll Pre-fetch Sentinel -->
+    <div id="scrollSentinel">
+      <div id="scrollLoader" class="scroll-loader">
+        <div class="spinner" style="width: 18px; height: 18px; border-width: 2px;"></div>
+        <span>আরও পোস্ট লোড হচ্ছে...</span>
+      </div>
+    </div>
+  </main>
+
+  <!-- Sticky Toast -->
+  <div id="toast"><i class="fa-solid fa-circle-check" style="color: #e50914;"></i> <span id="toastMsg"></span></div>
+
+  <!-- Footer -->
+  <footer>
+    <p>© 2026 CineStream • Ultra-Fast IndexedDB Cached Player</p>
+  </footer>
+
+  <!-- Plyr JS CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.polyfilled.min.js"></script>
+
+  <script>
+    const JSON_URL = 'https://raw.githubusercontent.com/appcreator05/post/main/8468988.json';
+    const PROXY_WORKER_BASE = 'https://debasis.installapkapps.workers.dev/?id=';
+    const BATCH_SIZE = 20;
+
+    let allMovies = [];
+    let filteredMovies = [];
+    let currentSelectedMovie = null;
+    let plyrPlayer = null;
+    let activeCategory = 'all';
+
+    // Infinite Auto-Scroll state
+    let renderedCount = 0;
+    let isLoadingMore = false;
+    let sentinelObserver = null;
+
+    // -------------------------------------------------------------
+    // 1. INDEXEDDB IMAGE CACHING ENGINE
+    // -------------------------------------------------------------
+    const DB_NAME = 'CineStreamCache';
+    const DB_VERSION = 1;
+    const STORE_NAME = 'images';
+    let dbInstance = null;
+
+    function initIndexedDB() {
+      return new Promise((resolve) => {
+        if (!('indexedDB' in window)) {
+          return resolve(null);
+        }
+        const request = indexedDB.open(DB_NAME, DB_VERSION);
+        request.onupgradeneeded = (e) => {
+          const db = e.target.result;
+          if (!db.objectStoreNames.contains(STORE_NAME)) {
+            db.createObjectStore(STORE_NAME);
+          }
+        };
+        request.onsuccess = (e) => {
+          dbInstance = e.target.result;
+          resolve(dbInstance);
+        };
+        request.onerror = () => resolve(null);
+      });
+    }
+
+    function getImageFromDB(url) {
+      return new Promise((resolve) => {
+        if (!dbInstance) return resolve(null);
+        try {
+          const tx = dbInstance.transaction(STORE_NAME, 'readonly');
+          const store = tx.objectStore(STORE_NAME);
+          const req = store.get(url);
+          req.onsuccess = () => resolve(req.result || null);
+          req.onerror = () => resolve(null);
+        } catch (e) {
+          resolve(null);
+        }
+      });
+    }
+
+    function saveImageToDB(url, blobData) {
+      if (!dbInstance) return;
+      try {
+        const tx = dbInstance.transaction(STORE_NAME, 'readwrite');
+        const store = tx.objectStore(STORE_NAME);
+        store.put(blobData, url);
+      } catch (e) {}
+    }
+
+    async function loadCachedImage(imgEl, originalUrl) {
+      if (!originalUrl || originalUrl.trim() === '') {
+        imgEl.src = 'https://placehold.co/300x450/1e293b/94a3b8?text=No+Poster';
+        return;
+      }
+
+      const cachedBlob = await getImageFromDB(originalUrl);
+      if (cachedBlob) {
+        imgEl.src = URL.createObjectURL(cachedBlob);
+        return;
+      }
+
+      try {
+        const res = await fetch(originalUrl, { mode: 'cors' });
+        if (res.ok) {
+          const blob = await res.blob();
+          saveImageToDB(originalUrl, blob);
+          imgEl.src = URL.createObjectURL(blob);
+          return;
+        }
+      } catch (err) {}
+      
+      imgEl.src = originalUrl;
+    }
+
+    // -------------------------------------------------------------
+    // 2. VIDEO URL FORMATTER
+    // -------------------------------------------------------------
+    function resolveVideoUrl(videoStr) {
+      if (!videoStr) return '';
+      const trimmed = videoStr.trim();
+
+      if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+        if (trimmed.includes('drive.google.com')) {
+          const match = trimmed.match(/\/d\/([a-zA-Z0-9_-]+)/) || trimmed.match(/id=([a-zA-Z0-9_-]+)/);
+          if (match && match[1]) {
+            const rawId = match[1];
+            const cleanId = rawId.length > 5 ? rawId.slice(0, -1) : rawId;
+            return `${PROXY_WORKER_BASE}${cleanId}`;
+          }
+        }
+        return trimmed;
+      }
+
+      const cleanedId = trimmed.length > 5 ? trimmed.slice(0, -1) : trimmed;
+      return `${PROXY_WORKER_BASE}${cleanedId}`;
+    }
+
+    // -------------------------------------------------------------
+    // 3. ROBUST FULLSCREEN & AUTO LANDSCAPE ORIENTATION MANAGER
+    // -------------------------------------------------------------
+    async function handleFullscreenOrientationChange() {
+      const isFullScreen = !!(
+        document.fullscreenElement ||
+        document.webkitFullscreenElement ||
+        document.mozFullScreenElement ||
+        document.msFullscreenElement ||
+        (plyrPlayer && plyrPlayer.fullscreen && plyrPlayer.fullscreen.active)
+      );
+
+      if (isFullScreen) {
+        try {
+          if (screen.orientation && typeof screen.orientation.lock === 'function') {
+            await screen.orientation.lock('landscape');
+          } else if (screen.lockOrientation) {
+            screen.lockOrientation('landscape');
+          } else if (screen.webkitLockOrientation) {
+            screen.webkitLockOrientation('landscape');
+          } else if (screen.mozLockOrientation) {
+            screen.mozLockOrientation('landscape');
+          }
+        } catch (err) {
+          console.warn("Screen orientation lock restricted:", err);
+        }
+      } else {
+        try {
+          if (screen.orientation && typeof screen.orientation.unlock === 'function') {
+            screen.orientation.unlock();
+          } else if (screen.unlockOrientation) {
+            screen.unlockOrientation();
+          } else if (screen.webkitUnlockOrientation) {
+            screen.webkitUnlockOrientation();
+          } else if (screen.mozUnlockOrientation) {
+            screen.mozUnlockOrientation();
+          }
+        } catch (err) {}
+      }
+    }
+
+    function initFullscreenOrientationListeners() {
+      const events = ['fullscreenchange', 'webkitfullscreenchange', 'mozfullscreenchange', 'MSFullscreenChange'];
+      events.forEach(event => {
+        document.addEventListener(event, handleFullscreenOrientationChange);
+      });
+    }
+
+    // -------------------------------------------------------------
+    // 4. PLYR INITIALIZER
+    // -------------------------------------------------------------
+    function initPlayer() {
+      const videoElement = document.getElementById('player');
+      try {
+        plyrPlayer = new Plyr(videoElement, {
+          loadSprite: false,
+          iconPrefix: 'plyr',
+          controls: [
+            'play-large', 'restart', 'rewind', 'play', 'fast-forward',
+            'progress', 'current-time', 'duration', 'mute', 'volume',
+            'settings', 'pip', 'fullscreen'
+          ],
+          seekTime: 10,
+          settings: ['speed', 'quality'],
+          speed: { selected: 1, options: [0.5, 0.75, 1, 1.25, 1.5, 2] },
+          tooltips: { controls: true, seek: true }
+        });
+
+        plyrPlayer.on('error', () => hideLoader());
+        plyrPlayer.on('canplay', () => hideLoader());
+        plyrPlayer.on('waiting', () => showLoader());
+        plyrPlayer.on('playing', () => hideLoader());
+
+        plyrPlayer.on('enterfullscreen', () => handleFullscreenOrientationChange());
+        plyrPlayer.on('exitfullscreen', () => handleFullscreenOrientationChange());
+
+      } catch (err) {
+        console.error("Plyr init error:", err);
+      }
+    }
+
+    function showLoader() {
+      document.getElementById('playerLoader').style.display = 'flex';
+    }
+    function hideLoader() {
+      document.getElementById('playerLoader').style.display = 'none';
+    }
+
+    function scrollToPlayer() {
+      const playerSection = document.getElementById('playerSection');
+      if (playerSection) {
+        const offset = 90;
+        const bodyRect = document.body.getBoundingClientRect().top;
+        const elementRect = playerSection.getBoundingClientRect().top;
+        const elementPosition = elementRect - bodyRect;
+        const offsetPosition = elementPosition - offset;
+
+        window.scrollTo({
+          top: offsetPosition > 0 ? offsetPosition : 0,
+          behavior: 'smooth'
+        });
+      }
+    }
+
+    function playMovie(movie, episodeIndex = null) {
+      if (!movie) return;
+      currentSelectedMovie = movie;
+      showLoader();
+
+      let targetVideoUrl = '';
+      let episodeTitle = '';
+
+      const hasEpisodes = Array.isArray(movie.episodes) && movie.episodes.length > 0;
+      if (hasEpisodes) {
+        const epIdx = episodeIndex !== null ? episodeIndex : 0;
+        const episode = movie.episodes[epIdx] || movie.episodes[0];
+        targetVideoUrl = resolveVideoUrl(episode.link || episode.video);
+        episodeTitle = ` - ${episode.title || `Episode ${epIdx + 1}`}`;
+      } else {
+        targetVideoUrl = resolveVideoUrl(movie.video || movie.link);
+      }
+
+      document.getElementById('currentTitle').innerText = (movie.title || 'Movie') + episodeTitle;
+      document.getElementById('currentCategory').innerText = movie.category || 'Movie';
+      document.getElementById('currentRating').innerHTML = `<i class="fa-solid fa-star"></i> ${movie.rating || 'N/A'}`;
+      document.getElementById('currentCast').innerHTML = `<strong>অভিনয়শিল্পী:</strong> ${movie.cast ? movie.cast.replace(/,\s*$/, '') : 'তথ্য পাওয়া যায়নি'}`;
+
+      const epSection = document.getElementById('episodesSection');
+      const epGrid = document.getElementById('episodesGrid');
+      const epBadge = document.getElementById('episodeCountBadge');
+
+      if (hasEpisodes) {
+        epSection.style.display = 'block';
+        epBadge.innerText = `${movie.episodes.length} টি পর্ব`;
+        epGrid.innerHTML = '';
+
+        movie.episodes.forEach((ep, idx) => {
+          const btn = document.createElement('button');
+          const isCurrent = (episodeIndex === null && idx === 0) || (episodeIndex === idx);
+          btn.className = `ep-btn ${isCurrent ? 'active' : ''}`;
+          btn.innerHTML = `<i class="fa-regular fa-circle-play" style="font-size: 10px; margin-right: 4px;"></i> ${ep.title || `Ep ${idx + 1}`}`;
+          btn.onclick = (e) => {
+            e.stopPropagation();
+            playMovie(movie, idx);
+          };
+          epGrid.appendChild(btn);
+        });
+      } else {
+        epSection.style.display = 'none';
+      }
+
+      document.getElementById('directStreamBtn').onclick = () => {
+        if (targetVideoUrl) window.open(targetVideoUrl, '_blank');
+      };
+
+      if (plyrPlayer) {
+        plyrPlayer.source = {
+          type: 'video',
+          title: movie.title,
+          sources: [{ src: targetVideoUrl, type: 'video/mp4' }],
+          poster: movie.poster || ''
+        };
+        plyrPlayer.play().catch(() => {});
+      }
+
+      scrollToPlayer();
+    }
+
+    // -------------------------------------------------------------
+    // 5. INFINITE AUTO SCROLL
+    // -------------------------------------------------------------
+    function renderNextBatch() {
+      if (isLoadingMore) return;
+      if (renderedCount >= filteredMovies.length) {
+        document.getElementById('scrollLoader').style.display = 'none';
+        return;
+      }
+
+      isLoadingMore = true;
+      const scrollLoader = document.getElementById('scrollLoader');
+      scrollLoader.style.display = 'flex';
+
+      const nextBatch = filteredMovies.slice(renderedCount, renderedCount + BATCH_SIZE);
+      const grid = document.getElementById('movieGrid');
+
+      nextBatch.forEach((movie, index) => {
+        const globalIndex = renderedCount + index;
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.dataset.index = globalIndex;
+
+        const isSeries = Array.isArray(movie.episodes) && movie.episodes.length > 0;
+
+        card.innerHTML = `
+          <div class="poster-wrap">
+            <img class="poster-img" alt="${movie.title}" loading="lazy" />
+            <span class="badge-cat">${movie.category || 'Movie'}</span>
+            <span class="badge-rating"><i class="fa-solid fa-star" style="font-size: 8px;"></i> ${movie.rating || 'N/A'}</span>
+            ${isSeries ? `<span class="badge-series">Series (${movie.episodes.length} Eps)</span>` : ''}
+          </div>
+          <div class="card-info">
+            <h4 class="card-title">${movie.title}</h4>
+            <p class="card-cast">${movie.cast ? movie.cast.replace(/,\s*$/, '') : 'Cast N/A'}</p>
+          </div>
+        `;
+
+        const imgEl = card.querySelector('.poster-img');
+        loadCachedImage(imgEl, movie.poster);
+
+        card.onclick = () => playMovie(movie);
+        grid.appendChild(card);
+      });
+
+      renderedCount += nextBatch.length;
+      isLoadingMore = false;
+      scrollLoader.style.display = 'none';
+    }
+
+    function setupPreFetchObserver() {
+      if (sentinelObserver) sentinelObserver.disconnect();
+
+      const sentinel = document.getElementById('scrollSentinel');
+      sentinelObserver = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting) {
+          renderNextBatch();
+        }
+      }, {
+        root: null,
+        rootMargin: '600px',
+        threshold: 0.1
+      });
+
+      sentinelObserver.observe(sentinel);
+    }
+
+    function renderMovieGrid(movies) {
+      const grid = document.getElementById('movieGrid');
+      const noResults = document.getElementById('noResults');
+      
+      grid.innerHTML = '';
+      renderedCount = 0;
+
+      if (!movies || movies.length === 0) {
+        noResults.style.display = 'block';
+        return;
+      }
+      noResults.style.display = 'none';
+
+      renderNextBatch();
+      setupPreFetchObserver();
+    }
+
+    // -------------------------------------------------------------
+    // 6. CATEGORIES & SEARCH FILTER (UPDATED FOR RANDOM ON 'ALL')
+    // -------------------------------------------------------------
+    function buildCategories(movies) {
+      const categoryContainer = document.getElementById('categoryContainer');
+      const categories = ['all'];
+
+      movies.forEach(m => {
+        if (m.category && !categories.includes(m.category.trim())) {
+          categories.push(m.category.trim());
+        }
+      });
+
+      categoryContainer.innerHTML = '';
+
+      categories.forEach(cat => {
+        const btn = document.createElement('button');
+        btn.className = `cat-btn ${activeCategory === cat ? 'active' : ''}`;
+        btn.innerText = cat === 'all' ? 'সকল ক্যাটাগরি' : cat;
+
+        btn.onclick = () => {
+          activeCategory = cat;
+          document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          applyFiltersAndSearch();
+        };
+
+        categoryContainer.appendChild(btn);
+      });
+    }
+
+    function applyFiltersAndSearch() {
+      const searchVal = document.getElementById('searchInput').value.toLowerCase().trim();
+      const sortVal = document.getElementById('sortSelect').value;
+
+      filteredMovies = allMovies.filter(item => {
+        const matchesCategory = (activeCategory === 'all') || (item.category && item.category.trim() === activeCategory);
+        const titleMatch = item.title && item.title.toLowerCase().includes(searchVal);
+        const castMatch = item.cast && item.cast.toLowerCase().includes(searchVal);
+        const catMatch = item.category && item.category.toLowerCase().includes(searchVal);
+
+        return matchesCategory && (!searchVal || titleMatch || castMatch || catMatch);
+      });
+
+      // **র‍্যান্ডম ও সর্টিং লজিক**
+      if (sortVal === 'random' || (activeCategory === 'all' && sortVal === 'default' && !searchVal)) {
+        // যদি "সকল ক্যাটাগরি" সিলেক্ট থাকে অথবা সর্টিং-এ 'random' থাকে, তবে লিস্ট এলোমেলো (Shuffle) করে দিবে
+        filteredMovies.sort(() => Math.random() - 0.5);
+      } else if (sortVal === 'rating-desc') {
+        filteredMovies.sort((a, b) => parseFloat(b.rating || 0) - parseFloat(a.rating || 0));
+      } else if (sortVal === 'title-asc') {
+        filteredMovies.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
+      }
+
+      const heading = document.getElementById('sectionHeading');
+      heading.innerText = activeCategory === 'all' ? 'সকল সিনেমা ও সিরিজ' : activeCategory;
+
+      renderMovieGrid(filteredMovies);
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toastMsg');
+      toastMsg.innerText = message;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2500);
+    }
+
+    // -------------------------------------------------------------
+    // 7. EVENT LISTENERS & BOOTSTRAP
+    // -------------------------------------------------------------
+    document.getElementById('copyUrlBtn').onclick = () => {
+      if (!currentSelectedMovie) {
+        showToast('প্রথমে একটি সিনেমা সিলেক্ট করুন!');
+        return;
+      }
+      const streamUrl = resolveVideoUrl(currentSelectedMovie.video || currentSelectedMovie.link);
+      if (!streamUrl) return;
+
+      const tempInput = document.createElement('input');
+      tempInput.value = streamUrl;
+      document.body.appendChild(tempInput);
+      tempInput.select();
+      document.execCommand('copy');
+      document.body.removeChild(tempInput);
+      showToast('ভিডিও লিঙ্ক কপি করা হয়েছে!');
+    };
+
+    const searchInput = document.getElementById('searchInput');
+    const clearBtn = document.getElementById('clearSearch');
+
+    searchInput.addEventListener('input', () => {
+      clearBtn.style.display = searchInput.value.trim() !== '' ? 'block' : 'none';
+      applyFiltersAndSearch();
+    });
+
+    clearBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      clearBtn.style.display = 'none';
+      applyFiltersAndSearch();
+    });
+
+    document.getElementById('sortSelect').addEventListener('change', applyFiltersAndSearch);
+
+    async function fetchMoviesData() {
+      try {
+        const response = await fetch(JSON_URL);
+        if (!response.ok) throw new Error('Network error');
+        const data = await response.json();
+        allMovies = Array.isArray(data) ? data : [];
+        filteredMovies = [...allMovies];
+
+        buildCategories(allMovies);
+        applyFiltersAndSearch(); // এখানে সরাসরি applyFiltersAndSearch কল করায় প্রথম লোডেই র‍্যান্ডম দেখাবে
+
+        if (allMovies.length > 0) {
+          playMovie(allMovies[0]);
+        }
+      } catch (err) {
+        console.error('Data error:', err);
+        showToast('ডেটা লোড করতে সমস্যা হয়েছে।');
+      }
+    }
+
+    window.onload = async function() {
+      await initIndexedDB();
+      initFullscreenOrientationListeners();
+      initPlayer();
+      fetchMoviesData();
+    };
+  </script>
+</body>
+</html>
