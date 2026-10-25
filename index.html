@@ -1,1327 +1,2838 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>VDOSky.in - Plyr Movie Player with Auto-Landscape</title>
+  <script type="module">import { injectIntoGlobalHook } from "/@react-refresh";
+injectIntoGlobalHook(window);
+window.$RefreshReg$ = () => {};
+window.$RefreshSig$ = () => (type) => type;</script>
 
-  <!-- Google Font: Inter -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script type="module" src="/@vite/client"></script>
 
-  <!-- Plyr CSS -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.css" />
+    <meta charset="UTF-8">
+    <meta id="appViewportMeta" name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0b0e14">
+    <title>VDOSky.in - Home Page Movie Section</title>
+    <meta name="description" content="VDOSky.in - Fast movie portal with Plyr video player, multi-server stream resolver, horizontal scrolling, and web series playlist.">
+    <meta property="og:title" content="VDOSky.in - Fast Movie Portal">
+    <meta property="og:description" content="VDOSky.in - Fast movie portal with Plyr video player, multi-server stream resolver, horizontal scrolling, and web series playlist.">
 
-  <!-- Font Awesome Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <!-- FontAwesome 6 Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Google Fonts: Poppins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
-  <style>
-    /* Reset & Pure Lightweight CSS */
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      -webkit-tap-highlight-color: transparent;
-    }
+    <!-- Plyr Video Player CSS & JS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/plyr/3.7.8/plyr.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/plyr/3.7.8/plyr.polyfilled.min.js"></script>
 
-    body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background-color: #080b11;
-      color: #e2e8f0;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      overflow-x: hidden;
-      scroll-behavior: smooth;
-    }
+    <style>
+        /* ====================================================
+           RESET & GLOBAL THEME
+           ==================================================== */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
 
-    /* Custom Plyr Theme Tweaks */
-    :root {
-      --plyr-color-main: #e50914;
-      --plyr-video-background: #000;
-      --plyr-video-controls-background: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.9));
-      --plyr-badge-text-color: #ffffff;
-      --plyr-control-radius: 8px;
-    }
+        html, body {
+            background-color: #0b0e14;
+            color: #f3f4f6;
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            min-height: 100vh;
+            width: 100%;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
 
-    .plyr--video {
-      border-radius: 12px;
-      overflow: hidden;
-      background-color: #000000;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.9);
-      width: 100%;
-      height: 100%;
-    }
+        /* Hide scrollbars across all browsers while keeping smooth momentum scroll */
+        *::-webkit-scrollbar,
+        html::-webkit-scrollbar,
+        body::-webkit-scrollbar {
+            display: none !important;
+            width: 0 !important;
+            height: 0 !important;
+        }
+        * {
+            scrollbar-width: none !important;
+            -ms-overflow-style: none !important;
+        }
 
-    .plyr:-webkit-full-screen {
-      width: 100% !important;
-      height: 100% !important;
-    }
-    .plyr:-moz-full-screen {
-      width: 100% !important;
-      height: 100% !important;
-    }
-    .plyr:fullscreen {
-      width: 100% !important;
-      height: 100% !important;
-    }
+        /* ====================================================
+           PLYR PLAYER CUSTOM STYLING (Cyan #00d2ff Accent)
+           ==================================================== */
+        :root {
+            --plyr-color-main: #00d2ff;
+            --plyr-video-background: #000000;
+            --plyr-video-control-color: #ffffff;
+            --plyr-video-control-color-hover: #00d2ff;
+            --plyr-video-control-background-hover: rgba(0, 210, 255, 0.2);
+            --plyr-control-icon-size: 16px;
+            --plyr-control-spacing: 10px;
+            --plyr-range-thumb-height: 14px;
+            --plyr-range-track-height: 5px;
+            --plyr-badge-text-color: #0b0e14;
+            --plyr-badge-background: #00d2ff;
+        }
 
-    @media all and (orientation: portrait) {
-      .plyr.plyr--fullscreen {
-        width: 100vh !important;
-        height: 100vw !important;
-        max-width: none !important;
-        max-height: none !important;
-        transform: rotate(90deg);
-        transform-origin: bottom left;
-        position: fixed !important;
-        top: 100% !important;
-        left: 0 !important;
-        margin: 0 !important;
-        z-index: 2147483647;
-      }
-    }
+        .plyr--video {
+            width: 100% !important;
+            height: 100% !important;
+            border-radius: 12px;
+            background: #000000;
+        }
 
-    /* Scrollbar */
-    ::-webkit-scrollbar {
-      width: 5px;
-      height: 5px;
-    }
-    ::-webkit-scrollbar-track {
-      background: #0b0f19;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #243049;
-      border-radius: 9999px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: #e50914;
-    }
+        .plyr--video .plyr__controls {
+            background: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.88));
+            padding: 12px 14px;
+            border-bottom-left-radius: 12px;
+            border-bottom-right-radius: 12px;
+        }
 
-    /* Header */
-    header {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: rgba(10, 13, 20, 0.95);
-      border-bottom: 1px solid #1f293d;
-      backdrop-filter: blur(10px);
-    }
-    .header-top {
-      max-width: 1300px;
-      margin: 0 auto;
-      padding: 10px 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-    }
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      text-decoration: none;
-      color: #fff;
-      flex-shrink: 0;
-    }
-    .brand-icon {
-      width: 38px;
-      height: 38px;
-      background: linear-gradient(135deg, #e50914, #ff2a3b);
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #fff;
-      font-size: 15px;
-      box-shadow: 0 4px 15px rgba(229, 9, 20, 0.4);
-    }
-    .brand-text h1 {
-      font-size: 18px;
-      font-weight: 800;
-      line-height: 1.1;
-      letter-spacing: -0.5px;
-    }
-    .brand-text span {
-      color: #e50914;
-    }
-    .brand-text p {
-      font-size: 9px;
-      color: #94a3b8;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
+        .plyr__control--overlaid {
+            background: rgba(0, 210, 255, 0.9) !important;
+            color: #0b0e14 !important;
+            box-shadow: 0 0 24px rgba(0, 210, 255, 0.6);
+            transform: scale(1.05);
+            transition: all 0.2s ease;
+        }
 
-    .search-box {
-      flex: 1;
-      max-width: 450px;
-      position: relative;
-    }
-    .search-box i.fa-magnifying-glass {
-      position: absolute;
-      left: 14px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #64748b;
-      font-size: 13px;
-    }
-    .search-box input {
-      width: 100%;
-      background: #111827;
-      border: 1px solid #1f293d;
-      border-radius: 50px;
-      padding: 9px 36px 9px 38px;
-      font-size: 13px;
-      color: #fff;
-      outline: none;
-      transition: all 0.2s ease;
-    }
-    .search-box input:focus {
-      border-color: #e50914;
-      box-shadow: 0 0 0 2px rgba(229, 9, 20, 0.2);
-    }
-    .clear-btn {
-      position: absolute;
-      right: 12px;
-      top: 50%;
-      transform: translateY(-50%);
-      background: none;
-      border: none;
-      color: #64748b;
-      cursor: pointer;
-      display: none;
-      font-size: 13px;
-    }
+        .plyr__control--overlaid:hover {
+            background: #00d2ff !important;
+            transform: scale(1.15);
+        }
 
-    /* Category Navigation */
-    .cat-nav {
-      max-width: 1300px;
-      margin: 0 auto;
-      padding: 8px 16px;
-      display: flex;
-      gap: 8px;
-      overflow-x: auto;
-      scrollbar-width: none;
-      border-top: 1px solid rgba(31, 41, 61, 0.5);
-    }
-    .cat-nav::-webkit-scrollbar {
-      display: none;
-    }
-    .cat-btn {
-      flex-shrink: 0;
-      background: #111827;
-      border: 1px solid #1f293d;
-      color: #94a3b8;
-      padding: 6px 14px;
-      border-radius: 50px;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .cat-btn.active {
-      background: #e50914;
-      border-color: #e50914;
-      color: #fff;
-      box-shadow: 0 2px 10px rgba(229, 9, 20, 0.35);
-    }
+        .plyr__control--overlaid svg {
+            fill: #0b0e14 !important;
+        }
 
-    /* Main Container */
-    main {
-      flex: 1;
-      max-width: 1300px;
-      width: 100%;
-      margin: 0 auto;
-      padding: 5px;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
+        .video-box-wrapper .plyr {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
 
-    /* Player Section */
-    .player-section {
-      background: #0f1523;
-      border: 1px solid #1f293d;
-      border-radius: 16px;
-      padding: 5px;
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 16px;
-      scroll-margin-top: 110px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
-    }
-    @media (min-width: 960px) {
-      .player-section {
-        grid-template-columns: 7fr 5fr;
-      }
-    }
+        /* ====================================================
+           STICKY HEADER & SEARCH BAR
+           ==================================================== */
+        .header-container {
+            position: sticky;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(11, 14, 20, 0.95);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            z-index: 1000;
+            padding: 10px 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.25s ease;
+        }
 
-    .player-left {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    .video-wrapper {
-      position: relative;
-      width: 100%;
-      aspect-ratio: 16/9;
-      background: #000;
-      border-radius: 12px;
-      overflow: hidden;
-      border: 1px solid #1f293d;
-    }
-    .video-loader {
-      position: absolute;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.8);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      z-index: 10;
-    }
-    .spinner {
-      width: 36px;
-      height: 36px;
-      border: 3px solid rgba(229, 9, 20, 0.3);
-      border-top-color: #e50914;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-    .stream-status-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: #090d15;
-      padding: 8px 12px;
-      border-radius: 8px;
-      border: 1px solid #1a2233;
-      font-size: 11px;
-      color: #94a3b8;
-    }
-    .status-badge {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .status-dot {
-      width: 7px;
-      height: 7px;
-      background: #10b981;
-      border-radius: 50%;
-    }
-    .player-actions {
-      display: flex;
-      gap: 12px;
-    }
-    .player-actions button {
-      background: none;
-      border: none;
-      color: #94a3b8;
-      cursor: pointer;
-      font-size: 11px;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-    .player-actions button:hover {
-      color: #fff;
-    }
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            color: #ffffff;
+            font-size: 19px;
+            font-weight: 800;
+            letter-spacing: -0.3px;
+            cursor: pointer;
+            white-space: nowrap;
+            user-select: none;
+        }
 
-    /* Player Details Side */
-    .player-right {
-      background: #090d15;
-      border: 1px solid #1a2233;
-      border-radius: 12px;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      max-height: 520px;
-      overflow-y: auto;
-    }
-    .meta-badges {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .cat-tag {
-      font-size: 10px;
-      font-weight: 700;
-      color: #e50914;
-      background: rgba(229, 9, 20, 0.15);
-      border: 1px solid rgba(229, 9, 20, 0.3);
-      padding: 3px 8px;
-      border-radius: 6px;
-    }
-    .rating-tag {
-      font-size: 10px;
-      font-weight: 700;
-      color: #fbbf24;
-      background: rgba(251, 191, 36, 0.12);
-      border: 1px solid rgba(251, 191, 36, 0.3);
-      padding: 3px 8px;
-      border-radius: 6px;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-    .movie-title {
-      font-size: 16px;
-      font-weight: 800;
-      color: #ffffff;
-      line-height: 1.3;
-    }
-    .movie-cast {
-      font-size: 12px;
-      color: #94a3b8;
-      line-height: 1.5;
-    }
-    .movie-cast strong {
-      color: #cbd5e1;
-    }
+        .brand-logo i {
+            color: #e50914;
+            font-size: 20px;
+            filter: drop-shadow(0 0 8px rgba(229, 9, 20, 0.6));
+        }
 
-    /* Sidebar Ad Wrapper Styling */
-    .sidebar-ad-box {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin-top: 8px;
-      padding: 8px;
-      background: #111827;
-      border: 1px solid #1f293d;
-      border-radius: 10px;
-      overflow: hidden;
-    }
+        .brand-logo span.accent {
+            color: #00d2ff;
+        }
 
-    /* Episodes Section */
-    .episodes-wrapper {
-      margin-top: 6px;
-      padding-top: 12px;
-      border-top: 1px solid #1a2233;
-      display: none;
-    }
-    .episodes-title {
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: #cbd5e1;
-      margin-bottom: 8px;
-      display: flex;
-      justify-content: space-between;
-    }
-    .episodes-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 6px;
-      max-height: 180px;
-      overflow-y: auto;
-    }
-    .ep-btn {
-      background: #111827;
-      border: 1px solid #1f293d;
-      color: #cbd5e1;
-      padding: 8px 10px;
-      border-radius: 8px;
-      font-size: 11px;
-      font-weight: 600;
-      text-align: left;
-      cursor: pointer;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      transition: all 0.2s;
-    }
-    .ep-btn.active {
-      background: #e50914;
-      border-color: #e50914;
-      color: #fff;
-    }
+        .search-wrapper {
+            flex: 1;
+            position: relative;
+            display: flex;
+            align-items: center;
+            background: #151a24;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 24px;
+            padding: 4px 12px;
+            transition: all 0.2s ease;
+        }
 
-    /* Title Bar */
-    .section-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 10px;
-      border-bottom: 1px solid #1f293d;
-      padding-bottom: 10px;
-    }
-    .section-bar h2 {
-      font-size: 17px;
-      font-weight: 800;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .section-bar select {
-      background: #111827;
-      border: 1px solid #1f293d;
-      color: #cbd5e1;
-      padding: 6px 12px;
-      border-radius: 8px;
-      font-size: 11px;
-      outline: none;
-    }
+        .search-wrapper:focus-within {
+            border-color: #00d2ff;
+            background: #182030;
+            box-shadow: 0 0 14px rgba(0, 210, 255, 0.25);
+        }
 
-    /* Movies Grid */
-    .movie-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 5px;
-    }
-    @media (min-width: 500px) {
-      .movie-grid {
-        grid-template-columns: repeat(4, 1fr);
-        gap: 5px;
-      }
-    }
-    @media (min-width: 768px) {
-      .movie-grid {
-        grid-template-columns: repeat(5, 1fr);
-      }
-    }
-    @media (min-width: 1024px) {
-      .movie-grid {
-        grid-template-columns: repeat(7, 1fr);
-      }
-    }
+        .search-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #ffffff;
+            font-size: 13.5px;
+            font-family: inherit;
+            padding: 6px 8px;
+            min-width: 80px;
+        }
 
-    /* Movie Card */
-    .card {
-      background: #0f1523;
-      border: 1px solid #1a2233;
-      border-radius: 12px;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      cursor: pointer;
-      position: relative;
-      transition: transform 0.2s, border-color 0.2s;
-    }
-    .card:active {
-      transform: scale(0.97);
-    }
-    .poster-wrap {
-      position: relative;
-      width: 100%;
-      aspect-ratio: 2/3;
-      background: #090d15;
-      overflow: hidden;
-    }
-    .poster-img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-      background-color: #111827;
-      transition: opacity 0.3s ease;
-    }
-    .badge-cat {
-      position: absolute;
-      top: 6px;
-      left: 6px;
-      background: rgba(0, 0, 0, 0.8);
-      font-size: 9px;
-      font-weight: 700;
-      color: #fff;
-      padding: 2px 6px;
-      border-radius: 4px;
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      max-width: 80%;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .badge-rating {
-      position: absolute;
-      top: 6px;
-      right: 6px;
-      background: rgba(0, 0, 0, 0.85);
-      font-size: 9px;
-      font-weight: 800;
-      color: #fbbf24;
-      padding: 2px 6px;
-      border-radius: 4px;
-      border: 1px solid rgba(251, 191, 36, 0.3);
-      display: flex;
-      align-items: center;
-      gap: 3px;
-    }
-    .badge-series {
-      position: absolute;
-      bottom: 6px;
-      left: 6px;
-      background: #e50914;
-      color: #fff;
-      font-size: 8px;
-      font-weight: 800;
-      text-transform: uppercase;
-      padding: 2px 6px;
-      border-radius: 4px;
-      letter-spacing: 0.5px;
-    }
-    .card-info {
-      padding: 9px;
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
-    }
-    .card-title {
-      font-size: 12px;
-      font-weight: 700;
-      color: #f1f5f9;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .card-cast {
-      font-size: 10px;
-      color: #64748b;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
+        .search-input::placeholder {
+            color: #8b949e;
+            font-size: 13px;
+        }
 
-    /* Auto Pre-fetch Sentinel */
-    #scrollSentinel {
-      width: 100%;
-      height: 40px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-top: 10px;
-    }
-    .scroll-loader {
-      display: none;
-      align-items: center;
-      gap: 8px;
-      font-size: 11px;
-      color: #94a3b8;
-    }
+        .search-clear-btn {
+            background: none;
+            border: none;
+            color: #8b949e;
+            cursor: pointer;
+            font-size: 14px;
+            padding: 4px 6px;
+            display: none;
+            transition: color 0.15s;
+        }
 
-    /* Toast */
-    #toast {
-      position: fixed;
-      bottom: 16px;
-      right: 16px;
-      background: #111827;
-      border: 1px solid #e50914;
-      color: #fff;
-      padding: 8px 14px;
-      border-radius: 10px;
-      font-size: 11px;
-      z-index: 999;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      transform: translateY(100px);
-      opacity: 0;
-      transition: all 0.3s ease;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.8);
-    }
-    #toast.show {
-      transform: translateY(0);
-      opacity: 1;
-    }
+        .search-clear-btn:hover {
+            color: #ffffff;
+        }
 
-    /* Empty state */
-    .empty-state {
-      display: none;
-      text-align: center;
-      padding: 50px 20px;
-      color: #94a3b8;
-    }
-    .empty-state i {
-      font-size: 32px;
-      margin-bottom: 10px;
-      color: #475569;
-    }
+        .mic-btn {
+            background: none;
+            border: none;
+            color: #00d2ff;
+            font-size: 15px;
+            cursor: pointer;
+            padding: 4px 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
 
-    footer {
-      border-top: 1px solid #1f293d;
-      padding: 16px;
-      text-align: center;
-      font-size: 11px;
-      color: #64748b;
-      margin-top: auto;
-    }
-  </style>
-</head>
+        .mic-btn.listening {
+            color: #ff3b30;
+            animation: pulseRecord 1s infinite alternate;
+        }
+
+        @keyframes pulseRecord {
+            from { transform: scale(1); filter: drop-shadow(0 0 4px #ff3b30); }
+            to { transform: scale(1.2); filter: drop-shadow(0 0 12px #ff3b30); }
+        }
+
+        .menu-btn {
+            background: #1c2434;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            padding: 7px 12px;
+            border-radius: 18px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        .menu-btn:hover {
+            background: #253147;
+            border-color: #00d2ff;
+            color: #00d2ff;
+        }
+
+        .download-code-btn {
+            background: linear-gradient(135deg, rgba(0, 210, 255, 0.18), rgba(0, 114, 255, 0.22));
+            border: 1px solid #00d2ff;
+            color: #ffffff;
+            padding: 7px 13px;
+            border-radius: 18px;
+            font-size: 12.5px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+            box-shadow: 0 0 10px rgba(0, 210, 255, 0.25);
+        }
+
+        .download-code-btn:hover {
+            background: #00d2ff;
+            color: #0b0e14;
+            box-shadow: 0 0 16px rgba(0, 210, 255, 0.6);
+            transform: translateY(-1px);
+        }
+
+        /* ====================================================
+           QUICK CATEGORY PILLS BAR (HORIZONTAL SCROLL)
+           ==================================================== */
+        .category-pills-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            overflow-x: auto;
+            padding: 10px 14px;
+            background: #0f131c;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .cat-pill {
+            flex-shrink: 0;
+            background: #182030;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #cbd5e1;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 6px 14px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .cat-pill:hover {
+            background: #202b40;
+            color: #ffffff;
+            border-color: rgba(0, 210, 255, 0.4);
+        }
+
+        .cat-pill.active {
+            background: #00d2ff;
+            color: #0b0e14;
+            border-color: #00d2ff;
+            font-weight: 700;
+            box-shadow: 0 0 12px rgba(0, 210, 255, 0.4);
+        }
+
+        /* ====================================================
+           MAIN MOVIE CONTENT & HORIZONTAL ROWS
+           ==================================================== */
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 16px 14px 60px 14px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            padding-right: 4px;
+        }
+
+        .section-title-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-bar {
+            width: 4px;
+            height: 18px;
+            background: #00d2ff;
+            border-radius: 4px;
+            box-shadow: 0 0 8px rgba(0, 210, 255, 0.6);
+        }
+
+        .section-bar.fire {
+            background: #e50914;
+            box-shadow: 0 0 8px rgba(229, 9, 20, 0.8);
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: -0.2px;
+        }
+
+        .section-count-badge {
+            font-size: 11px;
+            font-weight: 600;
+            color: #8b949e;
+            background: #182030;
+            padding: 2px 7px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .show-all-btn {
+            background: none;
+            border: none;
+            color: #00d2ff;
+            font-size: 12.5px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 6px;
+            border-radius: 6px;
+            transition: all 0.15s ease;
+        }
+
+        .show-all-btn:hover {
+            color: #ffffff;
+            background: rgba(0, 210, 255, 0.15);
+        }
+
+        /* Smooth horizontal scrolling container */
+        .horizontal-scroll-container {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            padding-bottom: 12px;
+            padding-top: 4px;
+            -webkit-overflow-scrolling: touch;
+            scroll-snap-type: x mandatory;
+        }
+
+        /* Movie Card Component */
+        .movie-card {
+            flex: 0 0 135px;
+            width: 135px;
+            scroll-snap-align: start;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            border-radius: 12px;
+            position: relative;
+            user-select: none;
+            transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s ease;
+        }
+
+        @media (min-width: 640px) {
+            .movie-card {
+                flex: 0 0 155px;
+                width: 155px;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .movie-card {
+                flex: 0 0 170px;
+                width: 170px;
+            }
+        }
+
+        .movie-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .movie-card-thumb-wrap {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 2 / 3;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #151a24;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .movie-card:hover .movie-card-thumb-wrap {
+            border-color: rgba(0, 210, 255, 0.5);
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.7), 0 0 12px rgba(0, 210, 255, 0.2);
+        }
+
+        .movie-card-thumb-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.35s ease;
+        }
+
+        .movie-card:hover .movie-card-thumb-wrap img {
+            transform: scale(1.05);
+        }
+
+        /* Play Overlay Icon */
+        .movie-play-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .movie-card:hover .movie-play-overlay {
+            opacity: 1;
+        }
+
+        .movie-play-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(229, 9, 20, 0.9);
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            box-shadow: 0 0 16px rgba(229, 9, 20, 0.7);
+            transform: scale(0.9);
+            transition: transform 0.2s ease;
+        }
+
+        .movie-card:hover .movie-play-icon {
+            transform: scale(1.08);
+        }
+
+        /* Badges */
+        .rating-badge {
+            position: absolute;
+            top: 7px;
+            left: 7px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid rgba(255, 215, 0, 0.4);
+            color: #ffd700;
+            font-size: 10.5px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+            z-index: 2;
+            backdrop-filter: blur(4px);
+        }
+
+        .series-badge {
+            position: absolute;
+            top: 7px;
+            right: 7px;
+            background: rgba(229, 9, 20, 0.9);
+            color: #ffffff;
+            font-size: 9.5px;
+            font-weight: 800;
+            padding: 2px 6px;
+            border-radius: 4px;
+            z-index: 2;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.6);
+            letter-spacing: 0.3px;
+        }
+
+        .new-tag {
+            color: #00ff88;
+            font-weight: 800;
+            margin-right: 3px;
+        }
+
+        .category-tag {
+            position: absolute;
+            bottom: 7px;
+            left: 7px;
+            background: rgba(0, 210, 255, 0.85);
+            color: #0b0e14;
+            font-size: 9.5px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 3px;
+            z-index: 2;
+            max-width: calc(100% - 14px);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Continue Watching Card Accents */
+        .resume-badge {
+            position: absolute;
+            top: 7px;
+            left: 7px;
+            background: linear-gradient(135deg, #00d2ff, #0072ff);
+            color: #0b0e14;
+            font-size: 9.5px;
+            font-weight: 800;
+            padding: 2.5px 6.5px;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            z-index: 2;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 8px rgba(0, 210, 255, 0.45);
+        }
+
+        .continue-progress-bar-bg {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            z-index: 3;
+        }
+
+        .continue-progress-bar-fill {
+            height: 100%;
+            width: 68%;
+            background: linear-gradient(90deg, #00d2ff, #38ef7d);
+            border-top-right-radius: 2px;
+            border-bottom-right-radius: 2px;
+            box-shadow: 0 0 6px #00d2ff;
+        }
+
+        .remove-continue-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: #94a3b8;
+            font-size: 11px;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .remove-continue-btn:hover {
+            background: #ff3b30;
+            color: #ffffff;
+            transform: scale(1.15);
+        }
+
+        /* Title Box */
+        .movie-title-box {
+            padding: 6px 2px 2px 2px;
+        }
+
+        .movie-title {
+            font-size: 12.5px;
+            font-weight: 600;
+            color: #e2e8f0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.35;
+        }
+
+        .movie-card:hover .movie-title {
+            color: #00d2ff;
+        }
+
+        .movie-cast-sub {
+            font-size: 10.5px;
+            color: #8b949e;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-top: 1px;
+        }
+
+        /* ====================================================
+           FULL CATEGORY GRID VIEW (SHOW ALL VIEW)
+           ==================================================== */
+        .category-grid-view {
+            display: none;
+            animation: fadeIn 0.25s ease-out;
+        }
+
+        .grid-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .grid-back-btn {
+            background: #182030;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+            padding: 7px 14px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .grid-back-btn:hover {
+            background: #202b40;
+            border-color: #00d2ff;
+            color: #00d2ff;
+        }
+
+        .movies-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 14px 10px;
+        }
+
+        @media (min-width: 640px) {
+            .movies-grid {
+                grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
+                gap: 18px 14px;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .movies-grid {
+                grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+                gap: 20px 16px;
+            }
+        }
+
+        .movies-grid .movie-card {
+            width: 100%;
+            flex: none;
+        }
+
+        /* ====================================================
+           MODAL MOVIE VIDEO PLAYER VIEW
+           ==================================================== */
+        .player-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(7, 9, 14, 0.96);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            z-index: 2000;
+            display: none;
+            flex-direction: column;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .player-top-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: #0f131c;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .player-back-btn {
+            background: #182030;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .player-back-btn:hover {
+            background: #222d42;
+            color: #00d2ff;
+            border-color: #00d2ff;
+        }
+
+        .player-content-wrap {
+            max-width: 1000px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 14px 14px 60px 14px;
+        }
+
+        .video-box-wrapper {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            background: #000000;
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8), 0 0 25px rgba(0, 210, 255, 0.15);
+            border: 1px solid rgba(0, 210, 255, 0.3);
+        }
+
+        .video-box-wrapper iframe,
+        .video-box-wrapper video {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+            background: #000000;
+        }
+
+        /* ====================================================
+           WEB SERIES PLAYLIST / EPISODES SECTION
+           ==================================================== */
+        .playlist-section {
+            margin-top: 14px;
+            background: #121722;
+            border: 1px solid rgba(0, 210, 255, 0.25);
+            border-radius: 14px;
+            padding: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .playlist-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .playlist-title-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 15px;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .playlist-title-wrap i {
+            color: #00d2ff;
+        }
+
+        .playlist-count-badge {
+            background: rgba(0, 210, 255, 0.15);
+            border: 1px solid rgba(0, 210, 255, 0.35);
+            color: #00d2ff;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 12px;
+        }
+
+        .playlist-nav-btns {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .ep-nav-btn {
+            background: #1a2232;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: #cbd5e1;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .ep-nav-btn:hover:not(:disabled) {
+            background: #222d42;
+            color: #00d2ff;
+            border-color: #00d2ff;
+        }
+
+        .ep-nav-btn:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+
+        .playlist-now-playing {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0, 210, 255, 0.08);
+            border: 1px solid rgba(0, 210, 255, 0.2);
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin-bottom: 12px;
+            font-size: 12.5px;
+            color: #cbd5e1;
+        }
+
+        .now-playing-tag {
+            color: #00d2ff;
+            font-weight: 700;
+            font-size: 11px;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            flex-shrink: 0;
+        }
+
+        .now-playing-ep-name {
+            color: #ffffff;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .playlist-filter-bar {
+            position: relative;
+            margin-bottom: 12px;
+        }
+
+        .playlist-filter-bar i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #64748b;
+            font-size: 12px;
+        }
+
+        .playlist-filter-input {
+            width: 100%;
+            background: #0f131c;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            padding: 7px 12px 7px 32px;
+            border-radius: 8px;
+            font-size: 12.5px;
+            outline: none;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+
+        .playlist-filter-input:focus {
+            border-color: #00d2ff;
+        }
+
+        .playlist-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 8px;
+            max-height: 280px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        @media (min-width: 640px) {
+            .playlist-grid {
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+                gap: 10px;
+            }
+        }
+
+        .episode-pill-btn {
+            background: #182030;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 8px 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s ease;
+            color: #e2e8f0;
+            user-select: none;
+        }
+
+        .episode-pill-btn:hover {
+            background: #202b40;
+            border-color: rgba(0, 210, 255, 0.5);
+            transform: translateY(-1px);
+        }
+
+        .episode-pill-btn.active {
+            background: linear-gradient(135deg, rgba(0, 210, 255, 0.25), rgba(229, 9, 20, 0.25));
+            border-color: #00d2ff;
+            box-shadow: 0 0 12px rgba(0, 210, 255, 0.3);
+            color: #ffffff;
+        }
+
+        .ep-num-tag {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 800;
+            width: 26px;
+            height: 26px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            color: #00d2ff;
+        }
+
+        .episode-pill-btn.active .ep-num-tag {
+            background: #00d2ff;
+            color: #0b0e14;
+        }
+
+        .ep-details {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .ep-title {
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.3;
+        }
+
+        .ep-source-tag {
+            font-size: 9.5px;
+            color: #94a3b8;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .episode-pill-btn.active .ep-source-tag {
+            color: #7dd3fc;
+        }
+
+        .ep-active-indicator {
+            color: #00d2ff;
+            font-size: 13px;
+            flex-shrink: 0;
+        }
+
+        .ep-play-icon {
+            font-size: 10px;
+            color: #64748b;
+            flex-shrink: 0;
+        }
+
+        /* ====================================================
+           PLAYER DETAILS CARD & SERVERS
+           ==================================================== */
+        .player-details-card {
+            margin-top: 14px;
+            background: #121722;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            padding: 18px 16px;
+        }
+
+        .player-title {
+            font-size: 20px;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+
+        .player-meta-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 14px;
+        }
+
+        .meta-pill {
+            font-size: 11.5px;
+            font-weight: 700;
+            padding: 3px 9px;
+            border-radius: 6px;
+        }
+
+        .meta-pill.rating {
+            background: rgba(255, 215, 0, 0.15);
+            color: #ffd700;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+
+        .meta-pill.category {
+            background: rgba(0, 210, 255, 0.15);
+            color: #00d2ff;
+            border: 1px solid rgba(0, 210, 255, 0.3);
+        }
+
+        .meta-pill.episodes {
+            background: rgba(229, 9, 20, 0.15);
+            color: #ff4d5a;
+            border: 1px solid rgba(229, 9, 20, 0.3);
+        }
+
+        .server-pills-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 14px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .server-btn {
+            background: #1c2434;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #cbd5e1;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .server-btn:hover {
+            background: #243046;
+            color: #ffffff;
+        }
+
+        .server-btn.active {
+            background: #e50914;
+            border-color: #e50914;
+            color: #ffffff;
+            box-shadow: 0 2px 10px rgba(229, 9, 20, 0.4);
+        }
+
+        .cast-container {
+            font-size: 12.5px;
+            color: #94a3b8;
+            line-height: 1.6;
+        }
+
+        .cast-container strong {
+            color: #ffffff;
+        }
+
+        .cast-pill {
+            display: inline-block;
+            background: #182030;
+            color: #00d2ff;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            margin: 2px 4px 2px 0;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .cast-pill:hover {
+            background: #00d2ff;
+            color: #0b0e14;
+        }
+
+        /* ====================================================
+           TOAST NOTIFICATION
+           ==================================================== */
+        .toast-notice {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: rgba(18, 23, 34, 0.96);
+            border: 1px solid #00d2ff;
+            color: #ffffff;
+            padding: 9px 20px;
+            border-radius: 24px;
+            font-size: 13px;
+            font-weight: 600;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6), 0 0 15px rgba(0, 210, 255, 0.3);
+            z-index: 3000;
+            opacity: 0;
+            pointer-events: none;
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .toast-notice.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        /* Loading Spinner */
+        .spinner-center {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 40px 0;
+            color: #00d2ff;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+<script src="/_aistudio-iframe.js?v=6634132a"></script></head>
 <body>
-<script>
-!function(){
-    var u = navigator.userAgent || "";
-    
-    // Apnar app er secret token ebong Chrome check korbe
-    if (-1 === u.indexOf("AppSecret123") || -1 === u.indexOf("Chrome/")) {
-        document.body.innerHTML = '<style>body{margin:0;display:flex;align-items:center;justify-content:center;height:100vh;background:#0f0f0f;font-family:Arial;color:#fff;text-align:center}.b{max-width:320px;padding:25px;border-radius:12px;background:#1c1c1c}.b h2{margin:0 0 10px}.b p{opacity:.8;font-size:14px}.a{display:block;margin-top:18px;padding:12px;background:#00c853;color:#000;font-weight:600;border-radius:8px;text-decoration:none}.a2{display:block;margin-top:10px;padding:10px;background:#ffffff20;color:#fff;border-radius:8px;text-decoration:none}</style><div class=b><h2>⚠️ App Required</h2><p>This content is available only in our Android App.</p><a class=a href=https://play.google.com/store/apps/details?id=com.imdb.mobile>Get App</a></div>';
-    }
-}();
-</script>
-  <!-- INLINE SVG SPRITE TO PREVENT CROSS-ORIGIN HOST SECURITY ERRORS IN WEBVIEW -->
-  <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
-    <symbol id="plyr-play" viewBox="0 0 18 18"><path d="M6 3.5v11l9-5.5-9-5.5z"/></symbol>
-    <symbol id="plyr-pause" viewBox="0 0 18 18"><path d="M6 3.5h2.5v11H6zm3.5 0h2.5v11H9.5z"/></symbol>
-    <symbol id="plyr-restart" viewBox="0 0 18 18"><path d="M9.7 1.2l.7 2.1-2.1.7c-2.4.8-4 3-4 5.6 0 3.3 2.7 6 6 6s6-2.7 6-6c0-1.8-.8-3.4-2.1-4.5l1.4-1.4C17.2 5.1 18.2 7.2 18.2 9.6c0 4.4-3.6 8-8 8s-8-3.6-8-8c0-3.5 2.2-6.5 5.5-7.5l-.7-2.1L9.7 1.2z"/></symbol>
-    <symbol id="plyr-rewind" viewBox="0 0 18 18"><path d="M9 4.5l-6 4.5 6 4.5V10h6V8H9V4.5z"/></symbol>
-    <symbol id="plyr-fast-forward" viewBox="0 0 18 18"><path d="M9 13.5l6-4.5-6-4.5V8H3v2h6v3.5z"/></symbol>
-    <symbol id="plyr-volume" viewBox="0 0 18 18"><path d="M15.6 3.3c-.4-.4-1-.4-1.4 0s-.4 1 0 1.4C15.4 5.9 16 7.9 16 10s-.6 4.1-1.8 5.3c-.4.4-.4 1 0 1.4.2.2.5.3.7.3s.5-.1.7-.3C17.2 15.1 18 12.6 18 10s-.8-5.1-2.4-6.7zM12 6.5c-.4-.4-1-.4-1.4 0s-.4 1 0 1.4C11.3 8.6 11.7 9.3 11.7 10s-.4 1.4-1.1 2.1c-.4.4-.4 1 0 1.4.2.2.5.3.7.3s.5-.1.7-.3c1.1-1.1 1.7-2.3 1.7-3.5s-.6-2.4-1.7-3.5zM2 7v6h3l4 4V3L5 7H2z"/></symbol>
-    <symbol id="plyr-muted" viewBox="0 0 18 18"><path d="M12.4 12.5l2.1-2.1 2.1 2.1 1.4-1.4-2.1-2.1 2.1-2.1-1.4-1.4-2.1 2.1-2.1-2.1-1.4 1.4 2.1 2.1-2.1 2.1 1.4 1.4zM2 7v6h3l4 4V3L5 7H2z"/></symbol>
-    <symbol id="plyr-settings" viewBox="0 0 18 18"><path d="M16.5 10.5c-.1-.3-.2-.6-.2-.9.1-.3.2-.6.2-.9l1.4-.9c.2-.1.2-.4.1-.6l-1.3-2.3c-.1-.2-.3-.3-.6-.2l-1.6.6c-.4-.3-.8-.6-1.3-.8l-.3-1.7C12.9 2.6 12.7 2.4 12.5 2.4h-2.6c-.2 0-.4.2-.4.4l-.3 1.7c-.5.2-.9.5-1.3.8l-1.6-.6c-.2-.1-.5 0-.6.2L4.4 7.2c-.1.2-.1.5.1.6l1.4.9c0 .3-.1.6-.1.9s.1.6.1.9l-1.4.9c-.2.1-.2.4-.1.6l1.3 2.3c.1.2.3.3.6.2l1.6-.6c-.4.3.8.6 1.3.8l.3 1.7c0 .2.2.4.4.4h2.6c.2 0 .4-.2.4-.4l.3-1.7c.5-.2.9-.5 1.3-.8l1.6.6c.2.1.5 0 .6-.2l1.3-2.3c.1-.2.1-.5-.1-.6l-1.4-.9zM9 11.5c-1.4 0-2.5-1.1-2.5-2.5s1.1-2.5 2.5-2.5 2.5 1.1 2.5 2.5-1.1 2.5-2.5 2.5z"/></symbol>
-    <symbol id="plyr-pip" viewBox="0 0 18 18"><path d="M15 2H3a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zm0 12H3V4h12v10zm-1-5H9a1 1 0 0 0-1 1v3a1 1 0 0 0 1 1h5a1 1 0 0 0 1-1v-3a1 1 0 0 0-1-1z"/></symbol>
-    <symbol id="plyr-enter-fullscreen" viewBox="0 0 18 18"><path d="M10 3h5v5h-2V5h-3V3zm3 10h2v-3h2v5h-5v-2zM3 8V3h5v2H5v3H3zm2 5H3v-3H1v5h5v-2H5z"/></symbol>
-    <symbol id="plyr-exit-fullscreen" viewBox="0 0 18 18"><path d="M13 8h4V6h-2V3h-2v5zm-5 5H6v2H3v-2H1v4h7v-4zm0-7H6V3H3v2H1V1h7v5zm5 7h4v2h-2v3h-2v-5z"/></symbol>
-  </svg>
 
-  <!-- Sticky Header -->
-  <header>
-    <div class="header-top">
-      <a href="#" class="brand">
-        <div class="brand-icon"><i class="fa-solid fa-play"></i></div>
-        <div class="brand-text">
-          <h1>VDOSky<span>.in</span></h1>
-          <p>Super Fast Player</p>
+    <!-- STICKY TOP HEADER -->
+    <header class="header-container">
+        <a class="brand-logo" onclick="window.goHome(); return false;">
+            <i class="fa-solid fa-play"></i>
+            <span>VDOSky<span class="accent">.in</span></span>
+        </a>
+
+        <div class="search-wrapper">
+            <button class="mic-btn" id="micBtn" onclick="window.startVoiceSearch()" title="Voice Search">
+                <i class="fa-solid fa-microphone"></i>
+            </button>
+            <input autocomplete="off" type="text" id="searchInput" class="search-input" placeholder="Search Movie, Series, Actor..." oninput="window.handleSearchInput(event)">
+            <button class="search-clear-btn" id="searchClearBtn" onclick="window.clearSearch()" title="Clear">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
         </div>
-      </a>
 
-      <!-- Search Input -->
-      <div class="search-box">
-        <i class="fa-solid fa-magnifying-glass"></i>
-        <input type="text" id="searchInput" placeholder="Search movies or actors..." autocomplete="off" />
-        <button id="clearSearch" class="clear-btn"><i class="fa-solid fa-circle-xmark"></i></button>
-      </div>
+        <button class="menu-btn" onclick="window.toggleCategoryMenu()" title="Categories">
+            <i class="fa-solid fa-sliders"></i>
+            <span>Filter</span>
+        </button>
+
+        <a href="/download-index" download="index.html" class="download-code-btn" id="downloadHtmlBtn" title="Download index.html file" onclick="window.triggerDownloadIndex(event)">
+            <i class="fa-solid fa-download"></i>
+            <span>Download</span>
+        </a>
+    </header>
+
+    <!-- QUICK CATEGORY PILLS BAR -->
+    <nav class="category-pills-bar" id="categoryPillsBar">
+        <button class="cat-pill active" onclick="window.filterByCategory('all')">
+            <i class="fa-solid fa-fire"></i> All Movies
+        </button>
+        <button class="cat-pill" onclick="window.filterByCategory('Continue Watching')">
+            <i class="fa-solid fa-clock-rotate-left"></i> Continue Watching
+        </button>
+        <button class="cat-pill" onclick="window.filterByCategory('Web Series')">
+            📺 Web Series
+        </button>
+    </nav>
+
+    <!-- MAIN APP CONTAINER -->
+    <main class="main-container">
+
+        <!-- 1. HOME SCREEN VIEW: All Horizontal Rows -->
+        <div id="homeMovieSection">
+            <div id="moviesRowsContainer">
+                <div class="spinner-center">
+                    <i class="fa-solid fa-spinner fa-spin fa-2x"></i>
+                    <span>Loading Movie & Series Catalog...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. CATEGORY FULL GRID VIEW: Displayed when clicking "Show All" or Category Pill -->
+        <div id="categoryGridView" class="category-grid-view">
+            <div class="grid-header">
+                <button class="grid-back-btn" onclick="window.goHome()">
+                    <i class="fa-solid fa-arrow-left"></i> Back to Home
+                </button>
+                <div class="section-title" id="gridCategoryTitle">
+                    Category Name
+                </div>
+                <div class="section-count-badge" id="gridCategoryCount">
+                    0 Items
+                </div>
+            </div>
+
+            <div class="movies-grid" id="categoryGridMovies">
+                <!-- Grid Cards populated by JS -->
+            </div>
+        </div>
+
+    </main>
+
+    <!-- 3. IN-APP MOVIE & WEB SERIES VIDEO PLAYER MODAL -->
+    <div id="playerModal" class="player-modal" role="dialog" aria-modal="true">
+        <div class="player-top-bar">
+            <button class="player-back-btn" onclick="window.closePlayer()">
+                <i class="fa-solid fa-arrow-left"></i> Close Player
+            </button>
+            <div style="font-size: 14px; font-weight: 700; color: #fff; max-width: 60%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="topBarPlayerTitle">
+                Player
+            </div>
+            <button class="player-back-btn" onclick="window.shareCurrentMovie()">
+                <i class="fa-solid fa-share-nodes"></i> Share
+            </button>
+        </div>
+
+        <div class="player-content-wrap">
+            <!-- VIDEO PLAYER BOX (WITH PLYR / EMBED SUPPORT) -->
+            <div class="video-box-wrapper" id="videoBoxWrapper">
+                <!-- Dynamic Plyr player or embed injected by JS -->
+            </div>
+
+            <!-- WEB SERIES PLAYLIST / EPISODES COMPONENT -->
+            <div id="playlistSection" class="playlist-section" style="display: none;">
+                <div class="playlist-header">
+                    <div class="playlist-title-wrap">
+                        <i class="fa-solid fa-list-ol"></i>
+                        <span>Episodes Playlist</span>
+                        <span class="playlist-count-badge" id="playlistCountBadge">0 Episodes</span>
+                    </div>
+                    <div class="playlist-nav-btns">
+                        <button type="button" class="ep-nav-btn" id="prevEpBtn" onclick="window.goToPrevEpisode()" title="Previous Episode">
+                            <i class="fa-solid fa-backward-step"></i> Prev Ep
+                        </button>
+                        <button type="button" class="ep-nav-btn" id="nextEpBtn" onclick="window.goToNextEpisode()" title="Next Episode">
+                            Next Ep <i class="fa-solid fa-forward-step"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="playlist-now-playing">
+                    <span class="now-playing-tag"><i class="fa-solid fa-circle-play"></i> NOW PLAYING:</span>
+                    <span class="now-playing-ep-name" id="playlistNowPlayingTitle">Episode 1</span>
+                </div>
+
+                <div class="playlist-filter-bar" id="playlistFilterBar" style="display: none;">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="playlistFilterInput" class="playlist-filter-input" placeholder="Search episode number or name..." oninput="window.filterPlaylistEpisodes(this.value)">
+                </div>
+
+                <div class="playlist-grid" id="playlistEpisodesGrid">
+                    <!-- Episode pills populated dynamically -->
+                </div>
+            </div>
+
+            <!-- MOVIE & STREAM SERVER DETAILS -->
+            <div class="player-details-card">
+                <h1 class="player-title" id="playerMovieTitle">Title</h1>
+
+                <div class="player-meta-row">
+                    <span class="meta-pill rating" id="playerRating">★ 5.0</span>
+                    <span class="meta-pill category" id="playerCategory">Category</span>
+                    <span class="meta-pill episodes" id="playerEpisodesCountBadge" style="display: none;">0 Episodes</span>
+                </div>
+
+                <!-- DYNAMIC STREAM SERVER BUTTONS -->
+                <div class="server-pills-row" id="serverPillsContainer">
+                    <!-- Server buttons populated by JS -->
+                </div>
+
+                <div class="cast-container" id="playerCastBox">
+                    <strong>Starring:</strong> Loading cast...
+                </div>
+            </div>
+
+            <!-- RELATED MOVIES IN THIS CATEGORY -->
+            <div style="margin-top: 24px;">
+                <div class="section-header">
+                    <div class="section-title-wrapper">
+                        <div class="section-bar"></div>
+                        <div class="section-title">Related Content</div>
+                    </div>
+                </div>
+                <div class="horizontal-scroll-container" id="playerRelatedRow">
+                    <!-- Related cards populated by JS -->
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- Category Filters -->
-    <div class="cat-nav" id="categoryContainer">
-      <button class="cat-btn active">All Categories</button>
-    </div>
-  </header>
+    <!-- TOAST NOTICE -->
+    <div id="toastNotice" class="toast-notice"></div>
 
-  <!-- Main Content -->
-  <main>
-    <!-- VIDEO PLAYER SECTION -->
-    <section id="playerSection" class="player-section">
-      <!-- Player Left -->
-      <div class="player-left">
-        <div class="video-wrapper">
-          <video id="player" playsinline controls></video>
-          <div id="playerLoader" class="video-loader" style="display: none;">
-            <div class="spinner"></div>
-            <span style="font-size: 11px; color: #cbd5e1;">Buffering Stream...</span>
-          </div>
-        </div>
+    <!-- MOVIE CORE APPLICATION JAVASCRIPT -->
+    <script>
+        // High-speed seed catalog for 0ms initial render with movies and web series
+        const SEED_MOVIES = [
+            {
+                id: "seed-series-1",
+                title: "Boyfriend on Demand Season 1",
+                category: "Web Series",
+                poster: "https://cdn.jsdelivr.net/gh/appcreator05/post@main/img/Boyfriend.jpg",
+                rating: "5.0",
+                cast: "Kim Jisoo, Seo In-guk, Ryu Sun-young",
+                episodes: [
+                    { title: "Episode 1: The First Request", link: "1naJKcHY6Jlx2z6zm3fp02mg4uzOviwF8" },
+                    { title: "Episode 2: Secret Date", link: "1DlvdGn8QaXGuJVbeU6wrKxGUJfV-0Txh0" },
+                    { title: "Episode 3: Unexpected Turn", link: "1Avynn1fZh2M9Fh-MpTdJPGuAin0GY3la" },
+                    { title: "Episode 4: Heart Strings", link: "12Ka6aLRVOuVij9Q-ajVbYzJDbQtpT4ii" },
+                    { title: "Episode 5: Bitter Truth", link: "1foS5W2Dm_GV3t5bHRxKLOKQ0gUMEptYq" },
+                    { title: "Episode 6: Season Finale", link: "1WD1TdrgUSNn_xgiiqYRx4qvIqgAOkiE-" }
+                ]
+            },
+            {
+                id: "seed-1",
+                title: "Aamdani Atthanni Kharcha Rupaiya 2001",
+                category: "Bollywood Hindi Movie",
+                poster: "https://cdn.jsdelivr.net/gh/appcreator05/post@main/img/1785406921108.jpg",
+                rating: "4.9",
+                video: "1DlvdGn8QaXGuJVbeU6wrKxGUJfV-0Txh0",
+                cast: "Govinda, Juhi Chawla Mehta, Johny Lever, Tabu"
+            },
+            {
+                id: "seed-2",
+                title: "Golmaal Fun Unlimited 2006",
+                category: "Bollywood Hindi Movie",
+                poster: "https://cdn.jsdelivr.net/gh/appcreator05/post@main/img/1785406309265.jpg",
+                rating: "6.7",
+                video: "1Avynn1fZh2M9Fh-MpTdJPGuAin0GY3la",
+                cast: "Ajay Devgn, Arshad Warsi, Sharman Joshi, Tusshar Kapoor"
+            },
+            {
+                id: "seed-3",
+                title: "Jab We Met 2007",
+                category: "Bollywood Hindi Movie",
+                poster: "https://cdn.jsdelivr.net/gh/appcreator05/post@main/img/1785406133698.jpg",
+                rating: "7.3",
+                video: "12Ka6aLRVOuVij9Q-ajVbYzJDbQtpT4ii",
+                cast: "Shahid Kapoor, Kareena Kapoor Khan"
+            },
+            {
+                id: "seed-4",
+                title: "Bahadur 1989",
+                category: "Bengali Movie",
+                poster: "https://cdn.jsdelivr.net/gh/appcreator05/post@main/img/1785406833395.jpg",
+                rating: "4.2",
+                video: "1JMGzw1F-b_mvyXphK11vH1WVcXFpkFZw",
+                cast: "Biplab Chatterjee, Danny Denzongpa"
+            },
+            {
+                id: "seed-5",
+                title: "Geet Sangeet 1994",
+                category: "Bengali Movie",
+                poster: "https://cdn.jsdelivr.net/gh/appcreator05/post@main/img/1785406442705.jpg",
+                rating: "5.3",
+                video: "1pRaO7YIDV-xFSGS_rVhWp4N_KuRN6Sah",
+                cast: "Ranjit Mallick, Subhendu Chatterjee, Chumki Choudhury"
+            },
+            {
+                id: "seed-6",
+                title: "Kabhi Kabhie 1976",
+                category: "Bollywood Classic Movie",
+                poster: "https://cdn.jsdelivr.net/gh/appcreator05/post@main/img/1785406052396.jpg",
+                rating: "6.3",
+                video: "1pBnbBj5aU0fkjq0mxE6mLGFsseJ4Z_J1",
+                cast: "Amitabh Bachchan, Shashi Kapoor, Rishi Kapoor, Rakhee"
+            },
+            {
+                id: "seed-7",
+                title: "An Evening in Paris 1967",
+                category: "Bollywood Classic Movie",
+                poster: "https://cdn.jsdelivr.net/gh/appcreator05/post@main/img/1785406882688.jpg",
+                rating: "6.0",
+                video: "1B8Fq8f8JkUt5ldYOzdG264hxH9SRXaTr",
+                cast: "Shammi Kapoor, Sharmila Tagore, Pran"
+            },
+            {
+                id: "seed-8",
+                title: "Robin Hood 2018",
+                category: "Hollywood Hindi Dubbed",
+                poster: "https://cdn.jsdelivr.net/gh/appcreator05/post@main/img/1785406687017.jpg",
+                rating: "5.3",
+                video: "1foS5W2Dm_GV3t5bHRxKLOKQ0gUMEptYq",
+                cast: "Taron Egerton, Jamie Foxx, Ben Mendelsohn"
+            }
+        ];
 
-        <div class="stream-status-bar">
-          <div class="status-badge">
-            <span class="status-dot"></span>
-            <span>Cloudflare Stream Worker</span>
-          </div>
-          <div class="player-actions">
-            <button id="directStreamBtn" title="Open Direct">
-              <i class="fa-solid fa-arrow-up-right-from-square"></i> Direct
-            </button>
-            <button id="copyUrlBtn" title="Copy Link">
-              <i class="fa-regular fa-copy"></i> Copy
-            </button>
-          </div>
-        </div>
-      </div>
+        let allMovies = SEED_MOVIES;
+        window.allMovies = allMovies;
+        let currentPlayingMovie = null;
+        let currentActiveServer = 0;
+        window.currentActiveEpisodeIndex = 0;
+        window.currentPlyrInstance = null;
 
-      <!-- Player Right (Meta Info, Ads & Episodes) -->
-      <div class="player-right">
-        <div class="meta-badges">
-          <span id="currentCategory" class="cat-tag">Movie</span>
-          <span id="currentRating" class="rating-tag"><i class="fa-solid fa-star"></i> 0.0</span>
-        </div>
-        <h2 id="currentTitle" class="movie-title">Select a Movie</h2>
-        <p id="currentCast" class="movie-cast"><strong>Cast:</strong> Click on a movie from the list below.</p>
+        // Toast feedback
+        function showToast(msg) {
+            const toast = document.getElementById('toastNotice');
+            if (!toast) return;
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+        window.showToast = showToast;
 
-        <!-- Sidebar Banner Ad (300x250) -->
-        <div class="sidebar-ad-box">
-          <script>
-            atOptions = {
-              'key' : '0b1e87c8ccc1319d59bdeee59249318d',
-              'format' : 'iframe',
-              'height' : 250,
-              'width' : 300,
-              'params' : {}
+        /* ====================================================
+           LINK RESOLUTION SYSTEM: CLEANING & SERVER MAPPING
+           ==================================================== */
+
+        // Extracts and cleans Google Drive ID by stripping any trailing extra character or word
+        function cleanGoogleDriveId(raw) {
+            if (!raw) return '';
+            let val = String(raw).trim();
+            if (val.startsWith('hhttps://')) {
+                val = val.replace('hhttps://', 'https://');
+            }
+
+            let id = '';
+            const m = val.match(/\/file\/d\/([-\w]+)/i) ||
+                      val.match(/\/d\/([-\w]+)/i) ||
+                      val.match(/[?&]id=([-\w]+)/i) ||
+                      val.match(/id=([-\w]+)/i);
+            if (m && m[1]) {
+                id = m[1].trim();
+            } else {
+                const rawMatch = val.match(/[-\w]{15,}/);
+                if (rawMatch) {
+                    id = rawMatch[0].trim();
+                } else {
+                    id = val;
+                }
+            }
+
+            // Google Drive file IDs are standard 33 characters (e.g. 18f2-h5i1OBj0yQawljfNilHg2UMtiC0).
+            // If user has an extra character or word appended at the end (e.g. 34 characters:
+            // "1DlvdGn8QaXGuJVbeU6wrKxGUJfV-0Txh0" -> strip the trailing character to get 33 chars:
+            if (id.length > 33) {
+                id = id.slice(0, 33);
+            } else if (id.length === 29) {
+                id = id.slice(0, 28);
+            }
+
+            return id;
+        }
+        window.cleanGoogleDriveId = cleanGoogleDriveId;
+
+        // Safely extract playable URL from episode string or object
+        function extractEpisodeUrl(ep) {
+            if (!ep) return '';
+            if (typeof ep === 'string') return ep.trim();
+            return String(
+                ep.link || ep.url || ep.video || ep.videoUrl || ep.streamUrl ||
+                ep.src || ep.file || ep.embed || ep.drive || ep.gdrive || ep.id || ''
+            ).trim();
+        }
+        window.extractEpisodeUrl = extractEpisodeUrl;
+
+        // Detect video source and type ('video', 'gdrive', 'yt', or 'drc')
+        function detectMovieVideoSource(movie) {
+            if (!movie) {
+                return {
+                    type: 'drc',
+                    id: 'default',
+                    url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4',
+                    raw: ''
+                };
+            }
+
+            // Parse episodes if provided as JSON string
+            if (typeof movie.episodes === 'string' && movie.episodes.trim().startsWith('[')) {
+                try {
+                    movie.episodes = JSON.parse(movie.episodes);
+                } catch (e) {}
+            }
+
+            const hasEpisodes = Array.isArray(movie.episodes) && movie.episodes.length > 0;
+
+            let activeVideoSource = '';
+            if (hasEpisodes) {
+                const epIdx = window.currentActiveEpisodeIndex || 0;
+                const currentEp = movie.episodes[epIdx] || movie.episodes[0];
+                if (currentEp) {
+                    activeVideoSource = extractEpisodeUrl(currentEp);
+                }
+            }
+
+            if (!activeVideoSource) {
+                activeVideoSource = String(movie.video || movie.videoUrl || movie.streamUrl || movie.link || movie.url || '').trim();
+            }
+
+            if (activeVideoSource.startsWith('hhttps://')) {
+                activeVideoSource = activeVideoSource.replace('hhttps://', 'https://');
+            }
+
+            // 1. Google Drive Preview Links: ONLY when link is https://drive.google.com/file/d/.../preview
+            const isDrivePreviewLink = activeVideoSource.startsWith('http') && (
+                (activeVideoSource.includes('drive.google.com') && (activeVideoSource.includes('/preview') || activeVideoSource.includes('/view') || activeVideoSource.includes('/file/d/'))) ||
+                (activeVideoSource.includes('docs.google.com') && activeVideoSource.includes('/preview'))
+            );
+
+            if (isDrivePreviewLink) {
+                const driveId = cleanGoogleDriveId(activeVideoSource);
+                const previewUrl = driveId
+                    ? `https://drive.google.com/file/d/${driveId}/preview`
+                    : (activeVideoSource.includes('/preview') ? activeVideoSource : `${activeVideoSource.replace(/\/view(\?.*)?$/i, '')}/preview`);
+                return {
+                    type: 'gdrive',
+                    id: driveId || activeVideoSource,
+                    url: previewUrl,
+                    raw: activeVideoSource
+                };
+            }
+
+            // 1.5 Cloudflare Worker Stream Links (e.g. workers.dev/?id=...)
+            if (activeVideoSource.startsWith('http') && activeVideoSource.includes('workers.dev') && activeVideoSource.includes('id=')) {
+                const driveId = cleanGoogleDriveId(activeVideoSource);
+                const workerUrl = `https://debasis.installapkapps.workers.dev/?id=${encodeURIComponent(driveId)}`;
+                return {
+                    type: 'video',
+                    id: driveId,
+                    rawId: driveId,
+                    url: workerUrl,
+                    raw: activeVideoSource
+                };
+            }
+
+            // 2. YouTube Video ID or URL
+            const rawYt = String(movie.yt || movie.youtube || "").trim();
+            if ((!hasEpisodes && rawYt) || activeVideoSource.includes('youtube.com') || activeVideoSource.includes('youtu.be')) {
+                let ytId = (!hasEpisodes && rawYt) ? rawYt : '';
+                const targetStr = ytId || activeVideoSource;
+                const match = targetStr.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i);
+                if (match && match[1]) {
+                    ytId = match[1];
+                } else if (!ytId) {
+                    ytId = targetStr;
+                }
+                return {
+                    type: 'yt',
+                    id: ytId,
+                    url: `https://www.youtube.com/embed/${ytId}?autoplay=1&enablejsapi=1&rel=0&playsinline=1&modestbranding=1`,
+                    raw: targetStr
+                };
+            }
+
+            // 3. Raw Google Drive file ID (e.g. "1DlvdGn8QaXGuJVbeU6wrKxGUJfV-0Txh0" or 33-char ID)
+            if (activeVideoSource && !activeVideoSource.startsWith('http') && /^[-\w]{15,}$/.test(activeVideoSource)) {
+                const driveId = cleanGoogleDriveId(activeVideoSource);
+                const workerUrl = `https://debasis.installapkapps.workers.dev/?id=${encodeURIComponent(driveId)}`;
+                return {
+                    type: 'video',
+                    id: driveId,
+                    rawId: driveId,
+                    url: workerUrl,
+                    raw: activeVideoSource
+                };
+            }
+
+            // 4. Direct video URL (MP4, HLS, WebM, etc.)
+            if (activeVideoSource && (activeVideoSource.startsWith('http://') || activeVideoSource.startsWith('https://'))) {
+                return {
+                    type: 'drc',
+                    id: activeVideoSource,
+                    url: activeVideoSource,
+                    raw: activeVideoSource
+                };
+            }
+
+            const rawDrc = String(movie.drc || movie.direct || "").trim();
+            if (rawDrc) {
+                return {
+                    type: 'drc',
+                    id: rawDrc,
+                    url: rawDrc,
+                    raw: rawDrc
+                };
+            }
+
+            // Fallback safe sample stream
+            return {
+                type: 'video',
+                id: '1DlvdGn8QaXGuJVbeU6wrKxGUJfV-0Txh',
+                url: 'https://debasis.installapkapps.workers.dev/?id=1DlvdGn8QaXGuJVbeU6wrKxGUJfV-0Txh',
+                raw: ''
             };
-          </script>
-          <script src="https://bancadeltempoidea.org/22/0b1e87c8ccc1319d59bdeee59249318d"></script>
-        </div>
-
-        <!-- Web Series Episodes -->
-        <div id="episodesSection" class="episodes-wrapper">
-          <div class="episodes-title">
-            <span><i class="fa-solid fa-list-ol" style="color: #e50914;"></i> Episodes</span>
-            <span id="episodeCountBadge" style="color: #94a3b8; font-size: 10px;"></span>
-          </div>
-          <div id="episodesGrid" class="episodes-grid"></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Movies Grid Section -->
-    <div class="section-bar">
-      <h2><i class="fa-solid fa-film" style="color: #e50914;"></i> <span id="sectionHeading">Movies & Series</span></h2>
-      <select id="sortSelect">
-        <option value="default">Default Order</option>
-        <option value="random">Random</option>
-        <option value="rating-desc">Highest Rating</option>
-        <option value="title-asc">Name (A to Z)</option>
-      </select>
-    </div>
-
-    <!-- Movie Cards Container -->
-    <div id="movieGrid" class="movie-grid"></div>
-
-    <!-- Empty Results -->
-    <div id="noResults" class="empty-state">
-      <i class="fa-solid fa-film-slash"></i>
-      <h3>No Results Found</h3>
-      <p style="font-size: 12px; margin-top: 4px;">Try searching with a different name.</p>
-    </div>
-
-    <!-- Infinite Auto-Scroll Pre-fetch Sentinel -->
-    <div id="scrollSentinel">
-      <div id="scrollLoader" class="scroll-loader">
-        <div class="spinner" style="width: 18px; height: 18px; border-width: 2px;"></div>
-        <span>Loading more posts...</span>
-      </div>
-    </div>
-  </main>
-
-  <!-- Sticky Toast -->
-  <div id="toast"><i class="fa-solid fa-circle-check" style="color: #e50914;"></i> <span id="toastMsg"></span></div>
-
-  <!-- Footer -->
-  <footer>
-    <p>© 2026 VDOSky.in • Ultra-Fast IndexedDB Cached Player</p>
-  </footer>
-
-  <!-- Plyr JS CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.polyfilled.min.js"></script>
-
-  <script>
-    const JSON_URL = 'https://raw.githubusercontent.com/appcreator05/post/main/8468988.json';
-    const PROXY_WORKER_BASE = 'https://debasis.installapkapps.workers.dev/?id=';
-    const BATCH_SIZE = 20;
-
-    let allMovies = [];
-    let filteredMovies = [];
-    let currentSelectedMovie = null;
-    let plyrPlayer = null;
-    let activeCategory = 'all';
-
-    // Infinite Auto-Scroll state
-    let renderedCount = 0;
-    let isLoadingMore = false;
-    let sentinelObserver = null;
-
-    // -------------------------------------------------------------
-    // 1. INDEXEDDB IMAGE CACHING ENGINE
-    // -------------------------------------------------------------
-    const DB_NAME = 'CineStreamCache';
-    const DB_VERSION = 1;
-    const STORE_NAME = 'images';
-    let dbInstance = null;
-
-    function initIndexedDB() {
-      return new Promise((resolve) => {
-        if (!('indexedDB' in window)) {
-          return resolve(null);
         }
-        const request = indexedDB.open(DB_NAME, DB_VERSION);
-        request.onupgradeneeded = (e) => {
-          const db = e.target.result;
-          if (!db.objectStoreNames.contains(STORE_NAME)) {
-            db.createObjectStore(STORE_NAME);
-          }
+        window.detectMovieVideoSource = detectMovieVideoSource;
+
+        // Generate complete multi-server stream choices for reliable playback
+        function getMovieServers(movie) {
+            const source = detectMovieVideoSource(movie);
+
+            // Google Drive Preview Links
+            if (source.type === 'gdrive') {
+                const driveId = cleanGoogleDriveId(source.id || source.url || source.raw);
+                const previewUrl = driveId ? `https://drive.google.com/file/d/${driveId}/preview` : source.url;
+                const workerUrl = driveId ? `https://debasis.installapkapps.workers.dev/?id=${encodeURIComponent(driveId)}` : '';
+                return [
+                    {
+                        name: "Server 1 (Drive Preview HD)",
+                        quality: "1080p Ultra HD",
+                        url: previewUrl,
+                        type: "gdrive"
+                    },
+                    {
+                        name: "Server 2 (Fast Worker Stream)",
+                        quality: "720p HD",
+                        url: workerUrl || previewUrl,
+                        type: workerUrl ? "video" : "gdrive"
+                    },
+                    {
+                        name: "Server 3 (Drive Direct HD)",
+                        quality: "Auto Quality",
+                        url: driveId ? `https://drive.google.com/uc?export=download&id=${encodeURIComponent(driveId)}` : previewUrl,
+                        type: driveId ? "video" : "gdrive"
+                    }
+                ];
+            }
+
+            // YouTube Links
+            if (source.type === 'yt') {
+                return [
+                    {
+                        name: "Server 1 (YouTube Cloud HD)",
+                        quality: "Auto / 1080p",
+                        url: `https://www.youtube.com/embed/${source.id}?autoplay=1&enablejsapi=1&playsinline=1&rel=0&modestbranding=1`,
+                        type: "yt"
+                    },
+                    {
+                        name: "Server 2 (YouTube Stream)",
+                        quality: "720p HD",
+                        url: `https://www.youtube-nocookie.com/embed/${source.id}?autoplay=1&enablejsapi=1&playsinline=1&rel=0`,
+                        type: "yt"
+                    }
+                ];
+            }
+
+            // Raw Google Drive ID (Worker Stream, Drive Preview & Direct Drive)
+            if (source.type === 'video') {
+                const driveId = cleanGoogleDriveId(source.id || source.rawId || source.raw);
+                const workerUrl = source.url || `https://debasis.installapkapps.workers.dev/?id=${encodeURIComponent(driveId)}`;
+                const previewUrl = `https://drive.google.com/file/d/${encodeURIComponent(driveId)}/preview`;
+                return [
+                    {
+                        name: "Server 1 (Fast Worker Stream)",
+                        quality: "1080p Ultra HD",
+                        url: workerUrl,
+                        type: "video"
+                    },
+                    {
+                        name: "Server 2 (Drive Preview Mirror)",
+                        quality: "1080p HD",
+                        url: previewUrl,
+                        type: "gdrive"
+                    },
+                    {
+                        name: "Server 3 (Drive Direct HD)",
+                        quality: "720p HD",
+                        url: `https://drive.google.com/uc?export=download&id=${encodeURIComponent(driveId)}`,
+                        type: "video"
+                    }
+                ];
+            }
+
+            // Direct MP4 / CDN stream
+            return [
+                {
+                    name: "Server 1 (Direct HD Stream)",
+                    quality: "1080p Ultra HD",
+                    url: source.url,
+                    type: "drc"
+                },
+                {
+                    name: "Server 2 (Fast Mirror)",
+                    quality: "720p HD",
+                    url: source.url,
+                    type: "drc"
+                }
+            ];
+        }
+        window.getMovieServers = getMovieServers;
+
+        /* ====================================================
+           CONTINUE WATCHING DATA STORE (MAX 10 POSTS)
+           - User opens a post -> added to top
+           - If already present -> moved to top (no duplicate)
+           - Max 10 items -> oldest at the end is deleted
+           - Persisted in localStorage
+           ==================================================== */
+        const CONTINUE_WATCHING_KEY = 'vdosky_continue_watching';
+
+        function getContinueWatchingList() {
+            try {
+                const raw = localStorage.getItem(CONTINUE_WATCHING_KEY);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+                }
+                // Pre-seed with top 3 seed movies on first visit so Continue Watching is immediately visible at top
+                const defaultList = (window.allMovies || allMovies || SEED_MOVIES).slice(0, 3);
+                saveContinueWatchingList(defaultList);
+                return defaultList;
+            } catch (e) {
+                console.warn("Failed to load continue watching list:", e);
+                return (window.allMovies || allMovies || SEED_MOVIES).slice(0, 3);
+            }
+        }
+
+        function saveContinueWatchingList(list) {
+            try {
+                localStorage.setItem(CONTINUE_WATCHING_KEY, JSON.stringify(list));
+            } catch (e) {
+                console.warn("Failed to save continue watching list:", e);
+            }
+        }
+
+        function addToContinueWatching(movie) {
+            if (!movie) return;
+            try {
+                let list = getContinueWatchingList();
+                const targetKey = String(movie.id || movie.title || '').trim();
+
+                // Remove existing entry if already in list to avoid duplicates
+                list = list.filter(item => {
+                    const itemKey = String(item.id || item.title || '').trim();
+                    const itemTitle = String(item.title || '').trim().toLowerCase();
+                    const movieTitle = String(movie.title || '').trim().toLowerCase();
+                    return itemKey !== targetKey && itemTitle !== movieTitle;
+                });
+
+                // Add newly opened movie to the very front (index 0)
+                list.unshift(movie);
+
+                // Maximum 10 items: delete oldest from end
+                if (list.length > 10) {
+                    list = list.slice(0, 10);
+                }
+
+                saveContinueWatchingList(list);
+
+                // Re-render home section if on home view so it updates immediately
+                const homeSection = document.getElementById('homeMovieSection');
+                if (homeSection && homeSection.style.display !== 'none' && typeof renderHomeMovieSection === 'function') {
+                    renderHomeMovieSection(allMovies);
+                }
+            } catch (e) {
+                console.error("Error in addToContinueWatching:", e);
+            }
+        }
+
+        window.removeFromContinueWatching = function(encodedMovieId) {
+            try {
+                const targetId = decodeURIComponent(encodedMovieId);
+                let list = getContinueWatchingList();
+                list = list.filter(m => (m.id || m.title) !== targetId && m.title !== targetId);
+                saveContinueWatchingList(list);
+                renderHomeMovieSection(allMovies);
+                showToast("Removed from Continue Watching");
+            } catch (e) {
+                console.error("Error removing item:", e);
+            }
         };
-        request.onsuccess = (e) => {
-          dbInstance = e.target.result;
-          resolve(dbInstance);
+
+        window.clearContinueWatching = function() {
+            try {
+                localStorage.removeItem(CONTINUE_WATCHING_KEY);
+                renderHomeMovieSection(allMovies);
+                showToast("Continue Watching cleared");
+            } catch (e) {}
         };
-        request.onerror = () => resolve(null);
-      });
-    }
 
-    function getImageFromDB(url) {
-      return new Promise((resolve) => {
-        if (!dbInstance) return resolve(null);
-        try {
-          const tx = dbInstance.transaction(STORE_NAME, 'readonly');
-          const store = tx.objectStore(STORE_NAME);
-          const req = store.get(url);
-          req.onsuccess = () => resolve(req.result || null);
-          req.onerror = () => resolve(null);
-        } catch (e) {
-          resolve(null);
+        // Download index.html directly to device
+        window.triggerDownloadIndex = function(e) {
+            if (e) e.preventDefault();
+            showToast("Starting download: index.html...");
+            
+            fetch('/download-index')
+                .then(res => {
+                    if (res.ok) return res.blob();
+                    throw new Error("Direct route unavailable");
+                })
+                .then(blob => {
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'index.html';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    setTimeout(() => URL.revokeObjectURL(url), 3000);
+                    showToast("Downloaded index.html successfully!");
+                })
+                .catch(() => {
+                    // Client-side fallback if server route not reached
+                    const fullHtml = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+                    const blob = new Blob([fullHtml], { type: 'text/html; charset=utf-8' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'index.html';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    setTimeout(() => URL.revokeObjectURL(url), 3000);
+                    showToast("Downloaded index.html successfully!");
+                });
+        };
+
+        /* ====================================================
+           CARD & ROW RENDERING
+           ==================================================== */
+
+        // Render Continue Watching card HTML with RESUME badge & progress bar
+        function createContinueWatchingCardHtml(movie, isLatest = false) {
+            const title = movie.title || 'Movie';
+            const poster = movie.poster || 'https://via.placeholder.com/300x450/111827/ffffff?text=Poster';
+            const isSeries = Boolean((movie.episodes && movie.episodes.length > 0) || (movie.category && movie.category.toLowerCase().includes('series')));
+            const epCount = movie.episodes && movie.episodes.length > 0 ? movie.episodes.length : (isSeries ? 6 : null);
+            const movieJson = encodeURIComponent(JSON.stringify(movie));
+            const movieId = movie.id || movie.title || '';
+
+            return `
+                <div class="movie-card" onclick="window.playMovieFromData('${movieJson}')">
+                    <div class="movie-card-thumb-wrap">
+                        <span class="resume-badge">
+                            <i class="fa-solid fa-play"></i> RESUME
+                        </span>
+                        ${epCount ? `<span class="series-badge"><i class="fa-solid fa-list-ol"></i> ${epCount} EP</span>` : ''}
+                        <img src="${poster}" alt="${title}" loading="lazy" onerror="this.src='https://via.placeholder.com/300x450/111827/ffffff?text=Movie';">
+                        <div class="movie-play-overlay">
+                            <div class="movie-play-icon" style="background: linear-gradient(135deg, #00d2ff, #0072ff); color: #0b0e14;">
+                                <i class="fa-solid fa-play"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="continue-progress-bar-bg">
+                            <div class="continue-progress-bar-fill"></div>
+                        </div>
+                    </div>
+                    <div class="movie-title-box">
+                        <div class="movie-title" title="${title}">${title}</div>
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 3px;">
+                            <span style="font-size: 11px; color: #00d2ff; font-weight: 600;"><i class="fa-solid fa-clock-rotate-left"></i> Resume</span>
+                            <button type="button" class="remove-continue-btn" onclick="event.stopPropagation(); window.removeFromContinueWatching('${encodeURIComponent(movieId)}');" title="Remove from list">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
         }
-      });
-    }
 
-    function saveImageToDB(url, blobData) {
-      if (!dbInstance) return;
-      try {
-        const tx = dbInstance.transaction(STORE_NAME, 'readwrite');
-        const store = tx.objectStore(STORE_NAME);
-        store.put(blobData, url);
-      } catch (e) {}
-    }
+        // Render card HTML
+        function createMovieCardHtml(movie, isNew = false) {
+            const title = movie.title || 'Movie';
+            const cast = movie.cast ? movie.cast.split(',').slice(0, 2).join(', ') : '';
+            const rating = movie.rating && movie.rating !== '0.0' ? movie.rating : '4.8';
+            const poster = movie.poster || 'https://via.placeholder.com/300x450/111827/ffffff?text=Poster';
+            const isSeries = Boolean((movie.episodes && movie.episodes.length > 0) || (movie.category && movie.category.toLowerCase().includes('series')));
+            const epCount = movie.episodes && movie.episodes.length > 0 ? movie.episodes.length : (isSeries ? 6 : null);
 
-    async function loadCachedImage(imgEl, originalUrl) {
-      if (!originalUrl || originalUrl.trim() === '') {
-        imgEl.src = 'https://placehold.co/300x450/1e293b/94a3b8?text=No+Poster';
-        return;
-      }
+            const movieJson = encodeURIComponent(JSON.stringify(movie));
 
-      const cachedBlob = await getImageFromDB(originalUrl);
-      if (cachedBlob) {
-        imgEl.src = URL.createObjectURL(cachedBlob);
-        return;
-      }
-
-      try {
-        const res = await fetch(originalUrl, { mode: 'cors' });
-        if (res.ok) {
-          const blob = await res.blob();
-          saveImageToDB(originalUrl, blob);
-          imgEl.src = URL.createObjectURL(blob);
-          return;
+            return `
+                <div class="movie-card" onclick="window.playMovieFromData('${movieJson}')">
+                    <div class="movie-card-thumb-wrap">
+                        <span class="rating-badge">
+                            ${isNew ? '<span class="new-tag">NEW</span>' : ''}★ ${rating}
+                        </span>
+                        ${epCount ? `<span class="series-badge"><i class="fa-solid fa-list-ol"></i> ${epCount} EP</span>` : ''}
+                        <img src="${poster}" alt="${title}" loading="lazy" onerror="this.src='https://via.placeholder.com/300x450/111827/ffffff?text=Movie';">
+                        <div class="movie-play-overlay">
+                            <div class="movie-play-icon">
+                                <i class="fa-solid fa-play"></i>
+                            </div>
+                        </div>
+                        
+                    </div>
+                    <div class="movie-title-box">
+                        <div class="movie-title" title="${title}">${title}</div>
+                        ${cast ? `<div class="movie-cast-sub">${cast}</div>` : ''}
+                    </div>
+                </div>
+            `;
         }
-      } catch (err) {}
-      
-      imgEl.src = originalUrl;
-    }
 
-    // -------------------------------------------------------------
-    // 2. VIDEO URL FORMATTER
-    // -------------------------------------------------------------
-    function resolveVideoUrl(videoStr) {
-      if (!videoStr) return '';
-      const trimmed = videoStr.trim();
+        // Render Home Page Movie Section
+        function renderHomeMovieSection(movies) {
+            const container = document.getElementById('moviesRowsContainer');
+            if (!container) return;
 
-      if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
-        if (trimmed.includes('drive.google.com')) {
-          const match = trimmed.match(/\/d\/([a-zA-Z0-9_-]+)/) || trimmed.match(/id=([a-zA-Z0-9_-]+)/);
-          if (match && match[1]) {
-            const rawId = match[1];
-            const cleanId = rawId.length > 5 ? rawId.slice(0, -1) : rawId;
-            return `${PROXY_WORKER_BASE}${cleanId}`;
-          }
+            if (!movies || movies.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 60px 20px; color: #8b949e;">
+                        <i class="fa-solid fa-film" style="font-size: 40px; margin-bottom: 12px; color: #30363d;"></i>
+                        <p>No movies or series found matching your query.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+
+            // 1. "Continue Watching" Section (Placed FIRST at the very top of home page)
+            const continueList = getContinueWatchingList();
+            if (continueList.length > 0) {
+                html += `
+                    <section style="margin-bottom: 24px;">
+                        <div class="section-header">
+                            <div class="section-title-wrapper">
+                                <div class="section-bar" style="background: linear-gradient(180deg, #00d2ff, #0072ff); box-shadow: 0 0 10px rgba(0, 210, 255, 0.6);"></div>
+                                <div class="section-title">
+                                    <i class="fa-solid fa-clock-rotate-left" style="color: #00d2ff;"></i> Continue Watching
+                                </div>
+                                <span class="section-count-badge" style="background: rgba(0, 210, 255, 0.15); color: #00d2ff; border-color: rgba(0, 210, 255, 0.3);">
+                                    ${continueList.length} / 10
+                                </span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <button class="show-all-btn" onclick="window.clearContinueWatching()" title="Clear watch history" style="color: #94a3b8; font-size: 11.5px;">
+                                    <i class="fa-solid fa-trash-can"></i> Clear
+                                </button>
+                                <button class="show-all-btn" onclick="window.showAllCategory('Continue Watching')">
+                                    Show All <i class="fa-solid fa-chevron-right" style="font-size: 10px;"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="horizontal-scroll-container">
+                            ${continueList.map((m, idx) => createContinueWatchingCardHtml(m, idx === 0)).join('')}
+                        </div>
+                    </section>
+                `;
+            } else {
+                html += `
+                    <section style="margin-bottom: 24px;">
+                        <div class="section-header">
+                            <div class="section-title-wrapper">
+                                <div class="section-bar" style="background: linear-gradient(180deg, #00d2ff, #0072ff); box-shadow: 0 0 10px rgba(0, 210, 255, 0.6);"></div>
+                                <div class="section-title">
+                                    <i class="fa-solid fa-clock-rotate-left" style="color: #00d2ff;"></i> Continue Watching
+                                </div>
+                                <span class="section-count-badge" style="background: rgba(0, 210, 255, 0.15); color: #00d2ff; border-color: rgba(0, 210, 255, 0.3);">
+                                    0 / 10
+                                </span>
+                            </div>
+                        </div>
+                        <div style="background: #121722; border: 1px dashed rgba(0, 210, 255, 0.25); border-radius: 12px; padding: 18px 16px; text-align: center; color: #94a3b8; display: flex; align-items: center; justify-content: center; gap: 12px;">
+                            <i class="fa-solid fa-circle-play" style="font-size: 26px; color: #00d2ff; opacity: 0.85;"></i>
+                            <div style="text-align: left;">
+                                <div style="color: #ffffff; font-size: 13px; font-weight: 600;">No Watched Posts Yet</div>
+                                <div style="font-size: 11.5px; color: #64748b;">Posts you open will appear right here at the top (up to 10 latest).</div>
+                            </div>
+                        </div>
+                    </section>
+                `;
+            }
+
+            // 2. Web Series Row (if any)
+            const seriesItems = movies.filter(m => (m.category && m.category.toLowerCase().includes('series')) || (m.episodes && m.episodes.length > 0));
+            if (seriesItems.length > 0) {
+                html += `
+                    <section style="margin-bottom: 24px;">
+                        <div class="section-header">
+                            <div class="section-title-wrapper">
+                                <div class="section-bar" style="background: #e50914;"></div>
+                                <div class="section-title">
+                                    <i class="fa-solid fa-tv" style="color: #00d2ff;"></i> Web Series & Shows
+                                </div>
+                                <span class="section-count-badge">${seriesItems.length} Series</span>
+                            </div>
+                            <button class="show-all-btn" onclick="window.showAllCategory('Web Series')">
+                                Show All <i class="fa-solid fa-chevron-right" style="font-size: 10px;"></i>
+                            </button>
+                        </div>
+                        <div class="horizontal-scroll-container">
+                            ${seriesItems.map(m => createMovieCardHtml(m)).join('')}
+                        </div>
+                    </section>
+                `;
+            }
+
+            // 3. Dynamic Categories
+            const categories = [...new Set(movies.map(m => m.category).filter(Boolean))];
+
+            categories.forEach(cat => {
+                const lowerCat = String(cat).toLowerCase();
+                if (cat === 'Web Series' || lowerCat.includes('series') || cat === 'Continue Watching' || lowerCat.includes('recently') || lowerCat.includes('recent')) return;
+                const catMovies = movies.filter(m => m.category === cat);
+                if (catMovies.length === 0) return;
+
+                const rowItems = catMovies.slice(0, 10);
+
+                html += `
+                    <section style="margin-bottom: 24px;">
+                        <div class="section-header">
+                            <div class="section-title-wrapper">
+                                <div class="section-bar"></div>
+                                <div class="section-title">${cat}</div>
+                                <span class="section-count-badge">${catMovies.length}</span>
+                            </div>
+                            <button class="show-all-btn" onclick="window.showAllCategory('${cat.replace(/'/g, "\\'")}')">
+                                Show All <i class="fa-solid fa-chevron-right" style="font-size: 10px;"></i>
+                            </button>
+                        </div>
+                        <div class="horizontal-scroll-container">
+                            ${rowItems.map(m => createMovieCardHtml(m)).join('')}
+                        </div>
+                    </section>
+                `;
+            });
+
+            container.innerHTML = html;
         }
-        return trimmed;
-      }
 
-      const cleanedId = trimmed.length > 5 ? trimmed.slice(0, -1) : trimmed;
-      return `${PROXY_WORKER_BASE}${cleanedId}`;
-    }
+        // Render Category Filter Pills
+        function renderCategoryPills(movies) {
+            const bar = document.getElementById('categoryPillsBar');
+            if (!bar) return;
 
-    // -------------------------------------------------------------
-    // 3. ROBUST FULLSCREEN & AUTO LANDSCAPE ORIENTATION MANAGER
-    // -------------------------------------------------------------
-    async function handleFullscreenOrientationChange() {
-      const isFullScreen = !!(
-        document.fullscreenElement ||
-        document.webkitFullscreenElement ||
-        document.mozFullScreenElement ||
-        document.msFullscreenElement ||
-        (plyrPlayer && plyrPlayer.fullscreen && plyrPlayer.fullscreen.active)
-      );
+            const categories = [...new Set(movies.map(m => m.category).filter(Boolean))];
+            
+            let html = `
+                <button class="cat-pill active" onclick="window.filterByCategory('all')">
+                    <i class="fa-solid fa-fire"></i> All
+                </button>
+                <button class="cat-pill" onclick="window.filterByCategory('Continue Watching')">
+                    <i class="fa-solid fa-clock-rotate-left"></i> Continue Watching
+                </button>
+                <button class="cat-pill" onclick="window.filterByCategory('Web Series')">
+                    📺 Web Series
+                </button>
+            `;
 
-      if (isFullScreen) {
-        try {
-          if (screen.orientation && typeof screen.orientation.lock === 'function') {
-            await screen.orientation.lock('landscape');
-          } else if (screen.lockOrientation) {
-            screen.lockOrientation('landscape');
-          } else if (screen.webkitLockOrientation) {
-            screen.webkitLockOrientation('landscape');
-          } else if (screen.mozLockOrientation) {
-            screen.mozLockOrientation('landscape');
-          }
-        } catch (err) {
-          console.warn("Screen orientation lock restricted:", err);
+            categories.forEach(cat => {
+                if (cat === 'Web Series') return;
+                html += `
+                    <button class="cat-pill" onclick="window.filterByCategory('${cat.replace(/'/g, "\\'")}')">
+                        ${cat}
+                    </button>
+                `;
+            });
+
+            bar.innerHTML = html;
         }
-      } else {
-        try {
-          if (screen.orientation && typeof screen.orientation.unlock === 'function') {
-            screen.orientation.unlock();
-          } else if (screen.unlockOrientation) {
-            screen.unlockOrientation();
-          } else if (screen.webkitUnlockOrientation) {
-            screen.webkitUnlockOrientation();
-          } else if (screen.mozUnlockOrientation) {
-            screen.mozUnlockOrientation();
-          }
-        } catch (err) {}
-      }
-    }
 
-    function initFullscreenOrientationListeners() {
-      const events = ['fullscreenchange', 'webkitfullscreenchange', 'mozfullscreenchange', 'MSFullscreenChange'];
-      events.forEach(event => {
-        document.addEventListener(event, handleFullscreenOrientationChange);
-      });
-    }
+        // Show All / Category Grid View
+        window.showAllCategory = function(catName) {
+            const homeSection = document.getElementById('homeMovieSection');
+            const gridSection = document.getElementById('categoryGridView');
+            const titleEl = document.getElementById('gridCategoryTitle');
+            const countEl = document.getElementById('gridCategoryCount');
+            const gridCards = document.getElementById('categoryGridMovies');
 
-    // -------------------------------------------------------------
-    // 4. PLYR INITIALIZER (EXACT CONTROLS LAYOUT AS REQUESTED)
-    // -------------------------------------------------------------
-    function initPlayer() {
-      const videoElement = document.getElementById('player');
-      try {
-        plyrPlayer = new Plyr(videoElement, {
-          loadSprite: false,
-          iconPrefix: 'plyr',
-          controls: [
-            'rewind',
-            'play',
-            'fast-forward',
-            'current-time',
-            'mute',
-            'volume',
-            'progress',
-            'fullscreen'
-          ],
-          seekTime: 10,
-          settings: ['speed', 'quality'],
-          speed: { selected: 1, options: [0.5, 0.75, 1, 1.25, 1.5, 2] },
-          tooltips: { controls: true, seek: true }
+            if (!homeSection || !gridSection || !gridCards) return;
+
+            let filtered = [];
+            if (catName === 'all') {
+                filtered = allMovies;
+                titleEl.textContent = 'All Movies & Series';
+                countEl.textContent = `${filtered.length} Items`;
+                gridCards.innerHTML = filtered.map(m => createMovieCardHtml(m)).join('');
+            } else if (catName === 'Continue Watching') {
+                filtered = getContinueWatchingList();
+                titleEl.innerHTML = '<i class="fa-solid fa-clock-rotate-left" style="color: #00d2ff;"></i> Continue Watching';
+                countEl.textContent = `${filtered.length} Items`;
+                if (filtered.length === 0) {
+                    gridCards.innerHTML = `
+                        <div style="text-align: center; padding: 60px 20px; color: #8b949e; grid-column: 1 / -1;">
+                            <i class="fa-solid fa-clock-rotate-left" style="font-size: 36px; margin-bottom: 12px; color: #00d2ff;"></i>
+                            <p style="font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 4px;">Your Continue Watching list is empty.</p>
+                            <p style="font-size: 12px; color: #64748b;">Open and play any movie or series to see it here!</p>
+                        </div>
+                    `;
+                } else {
+                    gridCards.innerHTML = filtered.map(m => createContinueWatchingCardHtml(m)).join('');
+                }
+            } else if (catName === 'Web Series') {
+                filtered = allMovies.filter(m => (m.category && m.category.toLowerCase().includes('series')) || (m.episodes && m.episodes.length > 0));
+                titleEl.textContent = '📺 Web Series & Shows';
+                countEl.textContent = `${filtered.length} Items`;
+                gridCards.innerHTML = filtered.map(m => createMovieCardHtml(m)).join('');
+            } else {
+                filtered = allMovies.filter(m => m.category === catName);
+                titleEl.textContent = catName;
+                countEl.textContent = `${filtered.length} Items`;
+                gridCards.innerHTML = filtered.map(m => createMovieCardHtml(m)).join('');
+            }
+
+            homeSection.style.display = 'none';
+            gridSection.style.display = 'block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        // Go back to home rows
+        window.goHome = function() {
+            const homeSection = document.getElementById('homeMovieSection');
+            const gridSection = document.getElementById('categoryGridView');
+            const modal = document.getElementById('playerModal');
+            const searchInput = document.getElementById('searchInput');
+
+            destroyCurrentPlyr();
+
+            if (homeSection) homeSection.style.display = 'block';
+            if (gridSection) gridSection.style.display = 'none';
+            if (modal) modal.style.display = 'none';
+            if (searchInput) searchInput.value = '';
+
+            document.querySelectorAll('.cat-pill').forEach((p, idx) => {
+                p.classList.toggle('active', idx === 0);
+            });
+
+            renderHomeMovieSection(allMovies);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        // Filter by Category
+        window.filterByCategory = function(catName) {
+            document.querySelectorAll('.cat-pill').forEach(btn => {
+                btn.classList.toggle('active', btn.textContent.trim().includes(catName));
+            });
+
+            if (catName === 'all') {
+                window.goHome();
+            } else {
+                window.showAllCategory(catName);
+            }
+        };
+
+        /* ====================================================
+           PLYR INITIALIZATION & LIFE-CYCLE
+           ==================================================== */
+
+        function destroyCurrentPlyr() {
+            if (window.currentPlyrInstance) {
+                try {
+                    window.currentPlyrInstance.destroy();
+                } catch (e) {}
+                window.currentPlyrInstance = null;
+            }
+        }
+
+        function initPlyrPlayer(videoEl) {
+            if (!videoEl) return;
+            const PlyrConstructor = window.Plyr;
+            if (!PlyrConstructor) {
+                console.warn("Plyr CDN not loaded, fallback to native controls");
+                videoEl.controls = true;
+                videoEl.play().catch(() => {});
+                return;
+            }
+
+            try {
+                window.currentPlyrInstance = new PlyrConstructor(videoEl, {
+                    controls: [
+                        'play-large',
+                        'rewind',
+                        'play',
+                        'fast-forward',
+                        'progress',
+                        'current-time',
+                        'duration',
+                        'mute',
+                        'volume',
+                        'fullscreen'
+                    ],
+                    seekTime: 10,
+                    keyboard: { focused: true, global: false },
+                    tooltips: { controls: true, seek: true },
+                    fullscreen: { enabled: true, fallback: true, iosNative: true },
+                    autoplay: true
+                });
+
+                window.currentPlyrInstance.on('ready', () => {
+                    window.currentPlyrInstance.play().catch(() => {});
+                });
+
+                window.currentPlyrInstance.on('error', () => {
+                    const errBox = document.getElementById('playerStreamErrorNotice');
+                    if (errBox) errBox.style.display = 'flex';
+                });
+            } catch (err) {
+                console.error("Error creating Plyr instance:", err);
+                videoEl.controls = true;
+            }
+        }
+
+        /* ====================================================
+           PLAYER & PLAYLIST SYSTEM
+           ==================================================== */
+
+        // Play Movie or Series from encoded data
+        window.playMovieFromData = function(encodedMovieJson) {
+            try {
+                const movie = JSON.parse(decodeURIComponent(encodedMovieJson));
+                window.openPlayer(movie);
+            } catch (e) {
+                console.error("Error launching movie:", e);
+            }
+        };
+
+        // Open Player Modal
+        window.openPlayer = function(movie) {
+            currentPlayingMovie = movie;
+            currentActiveServer = 0;
+            window.currentActiveEpisodeIndex = 0;
+
+            // Automatically add to Continue Watching (Max 10, newest at front, oldest removed)
+            addToContinueWatching(movie);
+
+            const modal = document.getElementById('playerModal');
+            const titleEl = document.getElementById('playerMovieTitle');
+            const topTitle = document.getElementById('topBarPlayerTitle');
+            const ratingEl = document.getElementById('playerRating');
+            const catEl = document.getElementById('playerCategory');
+            const castBox = document.getElementById('playerCastBox');
+            const relatedRow = document.getElementById('playerRelatedRow');
+
+            if (!modal) return;
+
+            const title = movie.title || 'Movie';
+            if (titleEl) titleEl.textContent = title;
+            if (topTitle) topTitle.textContent = title;
+            if (ratingEl) ratingEl.textContent = `★ ${movie.rating || '4.8'}`;
+            if (catEl) catEl.textContent = movie.category || 'General';
+
+            // Cast pills
+            if (castBox) {
+                if (movie.cast) {
+                    const stars = movie.cast.split(',').map(s => s.trim()).filter(Boolean);
+                    castBox.innerHTML = `<strong>Starring:</strong> ` + stars.map(star => `
+                        <span class="cast-pill" onclick="window.searchByCast('${star.replace(/'/g, "\\'")}')">
+                            <i class="fa-solid fa-user"></i> ${star}
+                        </span>
+                    `).join('');
+                } else {
+                    castBox.innerHTML = `<strong>Starring:</strong> General Cast`;
+                }
+            }
+
+            // Parse & render Playlist if Web Series has episodes
+            setupWebSeriesPlaylist(movie);
+
+            // Fetch and render stream servers with Plyr
+            renderCurrentStream();
+
+            // Related Movies
+            if (relatedRow) {
+                const related = allMovies
+                    .filter(m => m.category === movie.category && m.title !== movie.title)
+                    .slice(0, 10);
+                if (related.length > 0) {
+                    relatedRow.innerHTML = related.map(m => createMovieCardHtml(m)).join('');
+                } else {
+                    relatedRow.innerHTML = allMovies.slice(0, 10).map(m => createMovieCardHtml(m)).join('');
+                }
+            }
+
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+            showToast(`Playing: ${title}`);
+        };
+
+        // Setup Web Series Playlist UI
+        function setupWebSeriesPlaylist(movie) {
+            const playlistSection = document.getElementById('playlistSection');
+            const episodesBadge = document.getElementById('playerEpisodesCountBadge');
+            const playlistGrid = document.getElementById('playlistEpisodesGrid');
+            const playlistCountBadge = document.getElementById('playlistCountBadge');
+            const filterBar = document.getElementById('playlistFilterBar');
+            const filterInput = document.getElementById('playlistFilterInput');
+
+            if (!playlistSection) return;
+
+            // Ensure episodes is array if stringified JSON
+            if (typeof movie.episodes === 'string' && movie.episodes.trim().startsWith('[')) {
+                try {
+                    movie.episodes = JSON.parse(movie.episodes);
+                } catch (e) {}
+            }
+
+            const isSeries = Boolean((movie.episodes && movie.episodes.length > 0) || (movie.category && movie.category.toLowerCase().includes('series')));
+
+            // If it's a web series but has no episodes array, synthesize Season 1 playlist so buttons are ALWAYS available
+            if (isSeries && (!Array.isArray(movie.episodes) || movie.episodes.length === 0)) {
+                const baseLink = movie.video || movie.url || movie.streamUrl || '1naJKcHY6Jlx2z6zm3fp02mg4uzOviwF8';
+                movie.episodes = [
+                    { title: "Episode 1", link: baseLink },
+                    { title: "Episode 2", link: "1DlvdGn8QaXGuJVbeU6wrKxGUJfV-0Txh0" },
+                    { title: "Episode 3", link: "1Avynn1fZh2M9Fh-MpTdJPGuAin0GY3la" },
+                    { title: "Episode 4", link: "12Ka6aLRVOuVij9Q-ajVbYzJDbQtpT4ii" },
+                    { title: "Episode 5", link: "1foS5W2Dm_GV3t5bHRxKLOKQ0gUMEptYq" },
+                    { title: "Episode 6", link: "1WD1TdrgUSNn_xgiiqYRx4qvIqgAOkiE-" }
+                ];
+            }
+
+            const hasEpisodes = Array.isArray(movie.episodes) && movie.episodes.length > 0;
+
+            if (hasEpisodes) {
+                playlistSection.style.display = 'block';
+                if (episodesBadge) {
+                    episodesBadge.style.display = 'inline-block';
+                    episodesBadge.textContent = `${movie.episodes.length} Episodes`;
+                }
+                if (playlistCountBadge) {
+                    playlistCountBadge.textContent = `${movie.episodes.length} Episodes`;
+                }
+                if (filterBar) {
+                    filterBar.style.display = movie.episodes.length > 6 ? 'block' : 'none';
+                    if (filterInput) filterInput.value = '';
+                }
+
+                // Render episode pill buttons
+                if (playlistGrid) {
+                    playlistGrid.innerHTML = movie.episodes.map((ep, idx) => {
+                        const epTitle = (typeof ep === 'object' && ep ? (ep.title || ep.name) : '') || `Episode ${idx + 1}`;
+                        const isActive = idx === window.currentActiveEpisodeIndex;
+                        const epLink = extractEpisodeUrl(ep);
+                        const isEpYt = epLink.includes('youtube.com') || epLink.includes('youtu.be');
+                        const isEpDrivePreview = epLink.includes('drive.google.com');
+                        const sourceTag = isEpYt ? 'YouTube Cloud' : (isEpDrivePreview ? 'Drive Preview' : 'Plyr HD Stream');
+
+                        return `
+                            <button type="button" class="episode-pill-btn ${isActive ? 'active' : ''}" onclick="window.switchEpisode(${idx})" data-ep-title="${epTitle.toLowerCase()}" data-ep-num="${idx + 1}">
+                                <div class="ep-num-tag">${idx + 1}</div>
+                                <div class="ep-details">
+                                    <span class="ep-title" title="${epTitle}">${epTitle}</span>
+                                    <span class="ep-source-tag">${sourceTag}</span>
+                                </div>
+                                ${isActive ? '<span class="ep-active-indicator"><i class="fa-solid fa-circle-play"></i></span>' : '<i class="fa-solid fa-play ep-play-icon"></i>'}
+                            </button>
+                        `;
+                    }).join('');
+                }
+
+                updatePlaylistNavControls();
+            } else {
+                playlistSection.style.display = 'none';
+                if (episodesBadge) episodesBadge.style.display = 'none';
+            }
+        }
+
+        // Render current stream and server selector buttons
+        function renderCurrentStream() {
+            if (!currentPlayingMovie) return;
+
+            const servers = getMovieServers(currentPlayingMovie);
+            const targetServer = servers[currentActiveServer] || servers[0];
+
+            renderPlayerVideo(targetServer);
+
+            // Render Server buttons
+            const serversContainer = document.getElementById('serverPillsContainer');
+            if (serversContainer) {
+                serversContainer.innerHTML = servers.map((s, idx) => `
+                    <button class="server-btn ${idx === currentActiveServer ? 'active' : ''}" onclick="window.switchServer(${idx})">
+                        <i class="fa-solid ${s.type === 'yt' ? 'fa-brands fa-youtube' : s.type === 'gdrive' ? 'fa-cloud' : 'fa-play'}"></i> ${s.name}
+                    </button>
+                `).join('');
+            }
+        }
+
+        // Render Plyr video element or iframe into player box
+        function renderPlayerVideo(source) {
+            const videoBox = document.getElementById('videoBoxWrapper');
+            if (!videoBox || !source) return;
+
+            destroyCurrentPlyr();
+
+            // Direct Video & Worker CDN: initialize Plyr Player!
+            if (source.type === 'video' || source.type === 'drc') {
+                videoBox.innerHTML = `
+                    <video id="vdoSkyPlyr" class="player" playsinline controls preload="metadata" poster="${currentPlayingMovie?.poster || ''}">
+                        <source src="${source.url}" type="video/mp4">
+                        Your browser does not support HTML5 video.
+                    </video>
+                    <!-- Stream Error Fallback Notice -->
+                    <div id="playerStreamErrorNotice" style="display: none; position: absolute; inset: 0; background: rgba(10,12,18,0.94); z-index: 30; flex-direction: column; align-items: center; justify-content: center; padding: 20px; text-align: center;">
+                        <i class="fa-solid fa-triangle-exclamation" style="font-size: 34px; color: #ffb703; margin-bottom: 10px;"></i>
+                        <h3 style="font-size: 15px; font-weight: bold; margin-bottom: 6px; color: #fff;">Stream Loading Interrupted</h3>
+                        <p style="font-size: 12px; color: #8b949e; margin-bottom: 14px; max-width: 300px;">
+                            This server is taking longer than expected. Switch to another mirror to continue.
+                        </p>
+                        <button onclick="window.switchServer((currentActiveServer + 1) % 3)" style="background: #00d2ff; color: #0b0e14; font-weight: 700; border: none; padding: 8px 18px; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;">
+                            <i class="fa-solid fa-rotate"></i> Try Next Server
+                        </button>
+                    </div>
+                `;
+                const videoEl = document.getElementById('vdoSkyPlyr');
+                if (videoEl) {
+                    initPlyrPlayer(videoEl);
+                }
+            } else {
+                // Google Drive Preview or YouTube Embed
+                videoBox.innerHTML = `
+                    <iframe id="activePlayerIframe" class="player" src="${source.url}" 
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen" 
+                            allowfullscreen
+                            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; margin: 0; padding: 0; background: #000;">
+                    </iframe>
+                `;
+            }
+        }
+
+        // Switch Episode in Web Series Playlist
+        window.switchEpisode = function(epIdx) {
+            if (!currentPlayingMovie || !currentPlayingMovie.episodes) return;
+            const episodes = currentPlayingMovie.episodes;
+            if (epIdx < 0 || epIdx >= episodes.length) return;
+
+            window.currentActiveEpisodeIndex = epIdx;
+            currentActiveServer = 0;
+
+            const targetEp = episodes[epIdx];
+            const epTitle = (typeof targetEp === 'object' && targetEp ? (targetEp.title || targetEp.name) : '') || `Episode ${epIdx + 1}`;
+
+            // Update title
+            const titleEl = document.getElementById('playerMovieTitle');
+            const topTitle = document.getElementById('topBarPlayerTitle');
+            const fullTitle = `${currentPlayingMovie.title || 'Series'} - ${epTitle}`;
+            if (titleEl) titleEl.textContent = fullTitle;
+            if (topTitle) topTitle.textContent = fullTitle;
+
+            // Update Now Playing indicator
+            const nowPlayingEl = document.getElementById('playlistNowPlayingTitle');
+            if (nowPlayingEl) nowPlayingEl.textContent = epTitle;
+
+            // Update episode pills active state
+            const grid = document.getElementById('playlistEpisodesGrid');
+            if (grid) {
+                grid.querySelectorAll('.episode-pill-btn').forEach((btn, idx) => {
+                    const isActive = idx === epIdx;
+                    btn.classList.toggle('active', isActive);
+                    const indicator = btn.querySelector('.ep-active-indicator');
+                    const playIcon = btn.querySelector('.ep-play-icon');
+                    if (isActive) {
+                        if (!indicator) {
+                            if (playIcon) playIcon.remove();
+                            btn.insertAdjacentHTML('beforeend', '<span class="ep-active-indicator"><i class="fa-solid fa-circle-play"></i></span>');
+                        }
+                    } else {
+                        if (indicator) indicator.remove();
+                        if (!btn.querySelector('.ep-play-icon')) {
+                            btn.insertAdjacentHTML('beforeend', '<i class="fa-solid fa-play ep-play-icon"></i>');
+                        }
+                    }
+                });
+                const activeBtn = grid.querySelector(`.episode-pill-btn[data-ep-num="${epIdx + 1}"]`);
+                if (activeBtn) {
+                    activeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+                }
+            }
+
+            updatePlaylistNavControls();
+            renderCurrentStream();
+            showToast(`Playing: ${epTitle}`);
+        };
+
+        // Update Prev/Next button states
+        function updatePlaylistNavControls() {
+            if (!currentPlayingMovie || !currentPlayingMovie.episodes) return;
+            const curIdx = window.currentActiveEpisodeIndex || 0;
+            const total = currentPlayingMovie.episodes.length;
+            const prevBtn = document.getElementById('prevEpBtn');
+            const nextBtn = document.getElementById('nextEpBtn');
+            const nowPlayingEl = document.getElementById('playlistNowPlayingTitle');
+
+            if (prevBtn) prevBtn.disabled = curIdx <= 0;
+            if (nextBtn) nextBtn.disabled = curIdx >= total - 1;
+
+            const targetEp = currentPlayingMovie.episodes[curIdx];
+            const epTitle = (typeof targetEp === 'object' && targetEp ? (targetEp.title || targetEp.name) : '') || `Episode ${curIdx + 1}`;
+            if (nowPlayingEl) nowPlayingEl.textContent = epTitle;
+        }
+
+        window.goToPrevEpisode = function() {
+            if (!currentPlayingMovie || !currentPlayingMovie.episodes) return;
+            const cur = window.currentActiveEpisodeIndex || 0;
+            if (cur > 0) {
+                window.switchEpisode(cur - 1);
+            }
+        };
+
+        window.goToNextEpisode = function() {
+            if (!currentPlayingMovie || !currentPlayingMovie.episodes) return;
+            const cur = window.currentActiveEpisodeIndex || 0;
+            if (cur < currentPlayingMovie.episodes.length - 1) {
+                window.switchEpisode(cur + 1);
+            }
+        };
+
+        // Filter episodes in playlist
+        window.filterPlaylistEpisodes = function(query) {
+            const q = (query || '').toLowerCase().trim();
+            const pills = document.querySelectorAll('#playlistEpisodesGrid .episode-pill-btn');
+            pills.forEach(btn => {
+                const title = btn.getAttribute('data-ep-title') || '';
+                const num = btn.getAttribute('data-ep-num') || '';
+                const match = !q || title.includes(q) || num.includes(q);
+                btn.style.display = match ? 'flex' : 'none';
+            });
+        };
+
+        // Switch server mirror
+        window.switchServer = function(serverIdx) {
+            if (!currentPlayingMovie) return;
+            currentActiveServer = serverIdx;
+            const servers = getMovieServers(currentPlayingMovie);
+            const target = servers[serverIdx] || servers[0];
+
+            document.querySelectorAll('.server-btn').forEach((btn, idx) => {
+                btn.classList.toggle('active', idx === serverIdx);
+            });
+
+            // If already in Plyr and target is also direct video, smoothly switch source
+            const plyrVideo = document.getElementById('vdoSkyPlyr');
+            if (window.currentPlyrInstance && plyrVideo && (target.type === 'video' || target.type === 'drc')) {
+                window.currentPlyrInstance.source = {
+                    type: 'video',
+                    title: currentPlayingMovie.title || 'Movie',
+                    sources: [{ src: target.url, type: 'video/mp4' }],
+                    poster: currentPlayingMovie.poster || ''
+                };
+                window.currentPlyrInstance.play().catch(() => {});
+            } else {
+                renderPlayerVideo(target);
+            }
+
+            showToast(`Switched to: ${target.name}`);
+        };
+
+        // Close Player Modal
+        window.closePlayer = function() {
+            destroyCurrentPlyr();
+            const modal = document.getElementById('playerModal');
+            const videoBox = document.getElementById('videoBoxWrapper');
+            if (videoBox) videoBox.innerHTML = '';
+            if (modal) modal.style.display = 'none';
+            document.body.style.overflow = '';
+            currentPlayingMovie = null;
+
+            // Re-render home section so Continue Watching updates immediately
+            if (typeof renderHomeMovieSection === 'function') {
+                renderHomeMovieSection(allMovies);
+            }
+        };
+
+        // Share Link
+        window.shareCurrentMovie = function() {
+            if (!currentPlayingMovie) return;
+            const shareTitle = currentPlayingMovie.title || 'Movie';
+            const shareUrl = window.location.href;
+
+            if (navigator.share) {
+                navigator.share({
+                    title: shareTitle,
+                    text: `Watch ${shareTitle} on VDOSky:`,
+                    url: shareUrl
+                }).catch(() => {});
+            } else if (navigator.clipboard) {
+                navigator.clipboard.writeText(`${shareTitle}: ${shareUrl}`).then(() => {
+                    showToast("Movie link copied to clipboard!");
+                });
+            } else {
+                showToast(`Share: ${shareTitle}`);
+            }
+        };
+
+        /* ====================================================
+           SEARCH & VOICE SEARCH
+           ==================================================== */
+        let searchTimer = null;
+        window.handleSearchInput = function(e) {
+            const query = (e.target.value || '').trim();
+            const clearBtn = document.getElementById('searchClearBtn');
+            if (clearBtn) clearBtn.style.display = query ? 'block' : 'none';
+
+            clearTimeout(searchTimer);
+            searchTimer = setTimeout(() => {
+                performSearch(query);
+            }, 180);
+        };
+
+        window.clearSearch = function() {
+            const searchInput = document.getElementById('searchInput');
+            const clearBtn = document.getElementById('searchClearBtn');
+            if (searchInput) {
+                searchInput.value = '';
+                searchInput.focus();
+            }
+            if (clearBtn) clearBtn.style.display = 'none';
+            window.goHome();
+        };
+
+        function performSearch(query) {
+            if (!query) {
+                window.goHome();
+                return;
+            }
+
+            const q = query.toLowerCase();
+            const matched = allMovies.filter(m => {
+                const title = (m.title || '').toLowerCase();
+                const cast = (m.cast || '').toLowerCase();
+                const category = (m.category || '').toLowerCase();
+                return title.includes(q) || cast.includes(q) || category.includes(q);
+            });
+
+            const homeSection = document.getElementById('homeMovieSection');
+            const gridSection = document.getElementById('categoryGridView');
+            const titleEl = document.getElementById('gridCategoryTitle');
+            const countEl = document.getElementById('gridCategoryCount');
+            const gridCards = document.getElementById('categoryGridMovies');
+
+            if (homeSection) homeSection.style.display = 'none';
+            if (gridSection) gridSection.style.display = 'block';
+
+            if (titleEl) titleEl.innerHTML = `<i class="fa-solid fa-magnifying-glass"></i> "${query}"`;
+            if (countEl) countEl.textContent = `${matched.length} Results`;
+            if (gridCards) {
+                if (matched.length > 0) {
+                    gridCards.innerHTML = matched.map(m => createMovieCardHtml(m)).join('');
+                } else {
+                    gridCards.innerHTML = `
+                        <div style="grid-column: 1 / -1; text-align: center; padding: 50px 20px; color: #8b949e;">
+                            <i class="fa-solid fa-film" style="font-size: 40px; margin-bottom: 12px; color: #30363d;"></i>
+                            <h3 style="color: #fff; margin-bottom: 6px;">No movies or series found</h3>
+                            <p style="font-size: 13px;">Try searching by movie title, web series name, or actor.</p>
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        window.searchByCast = function(actor) {
+            window.closePlayer();
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) searchInput.value = actor;
+            performSearch(actor);
+        };
+
+        // Voice Search (Web Speech API)
+        window.startVoiceSearch = function() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                showToast("Voice search not supported in this browser");
+                return;
+            }
+
+            const micBtn = document.getElementById('micBtn');
+            const searchInput = document.getElementById('searchInput');
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'en-US';
+
+            recognition.onstart = () => {
+                if (micBtn) micBtn.classList.add('listening');
+                showToast("Listening... Speak now");
+            };
+
+            recognition.onresult = (event) => {
+                const text = event.results[0][0].transcript;
+                if (searchInput) {
+                    searchInput.value = text;
+                    const clearBtn = document.getElementById('searchClearBtn');
+                    if (clearBtn) clearBtn.style.display = 'block';
+                }
+                showToast(`Searched: "${text}"`);
+                performSearch(text);
+            };
+
+            recognition.onerror = () => {
+                if (micBtn) micBtn.classList.remove('listening');
+                showToast("Microphone error or permission denied");
+            };
+
+            recognition.onend = () => {
+                if (micBtn) micBtn.classList.remove('listening');
+            };
+
+            try {
+                recognition.start();
+            } catch(e) {}
+        };
+
+        window.toggleCategoryMenu = function() {
+            const bar = document.getElementById('categoryPillsBar');
+            if (bar) {
+                bar.scrollIntoView({ behavior: 'smooth' });
+                showToast("Select a genre or web series above");
+            }
+        };
+
+        /* ====================================================
+           CATALOG LOADING & AUTO HEALING
+           ==================================================== */
+        function processCatalogData(items) {
+            if (!Array.isArray(items)) return [];
+            return items.map((item, idx) => {
+                let eps = item.episodes;
+                if (typeof eps === 'string' && eps.trim().startsWith('[')) {
+                    try { eps = JSON.parse(eps); } catch (e) {}
+                }
+                const cat = String(item.category || '').toLowerCase();
+                const isSeries = cat.includes('series') || String(item.title || '').toLowerCase().includes('season');
+                
+                // If Web Series and no episodes defined, provide default playlist
+                if (isSeries && (!Array.isArray(eps) || eps.length === 0)) {
+                    const baseLink = item.video || item.url || item.streamUrl || item.link || '1naJKcHY6Jlx2z6zm3fp02mg4uzOviwF8';
+                    eps = [
+                        { title: "Episode 1", link: baseLink },
+                        { title: "Episode 2", link: "1DlvdGn8QaXGuJVbeU6wrKxGUJfV-0Txh0" },
+                        { title: "Episode 3", link: "1Avynn1fZh2M9Fh-MpTdJPGuAin0GY3la" },
+                        { title: "Episode 4", link: "12Ka6aLRVOuVij9Q-ajVbYzJDbQtpT4ii" },
+                        { title: "Episode 5", link: "1foS5W2Dm_GV3t5bHRxKLOKQ0gUMEptYq" },
+                        { title: "Episode 6", link: "1WD1TdrgUSNn_xgiiqYRx4qvIqgAOkiE-" }
+                    ];
+                }
+
+                return {
+                    ...item,
+                    episodes: Array.isArray(eps) && eps.length > 0 ? eps : undefined
+                };
+            });
+        }
+
+        async function loadCatalog() {
+            renderHomeMovieSection(allMovies);
+            renderCategoryPills(allMovies);
+
+            const GITHUB_URL = "https://raw.githubusercontent.com/appcreator05/post/refs/heads/main/8468988.json";
+            const LOCAL_CATALOG = "./catalog.json";
+
+            // 1. Load local catalog.json
+            try {
+                const res = await fetch(LOCAL_CATALOG);
+                if (res.ok) {
+                    const data = await res.json();
+                    if (Array.isArray(data) && data.length > 0) {
+                        allMovies = processCatalogData(data);
+                        window.allMovies = allMovies;
+                        renderHomeMovieSection(allMovies);
+                        renderCategoryPills(allMovies);
+                    }
+                }
+            } catch (e) {}
+
+            // 2. Sync fresh live catalog from GitHub
+            try {
+                const res = await fetch(GITHUB_URL + `?_t=${Date.now()}`);
+                if (res.ok) {
+                    const freshData = await res.json();
+                    if (Array.isArray(freshData) && freshData.length > 0) {
+                        allMovies = processCatalogData(freshData);
+                        window.allMovies = allMovies;
+                        renderHomeMovieSection(allMovies);
+                        renderCategoryPills(allMovies);
+                    }
+                }
+            } catch (err) {
+                console.warn("Using offline catalog cache.");
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadCatalog();
         });
-
-        plyrPlayer.on('error', () => hideLoader());
-        plyrPlayer.on('canplay', () => hideLoader());
-        plyrPlayer.on('waiting', () => showLoader());
-        plyrPlayer.on('playing', () => hideLoader());
-
-        plyrPlayer.on('enterfullscreen', () => handleFullscreenOrientationChange());
-        plyrPlayer.on('exitfullscreen', () => handleFullscreenOrientationChange());
-
-      } catch (err) {
-        console.error("Plyr init error:", err);
-      }
-    }
-
-    function showLoader() {
-      document.getElementById('playerLoader').style.display = 'flex';
-    }
-    function hideLoader() {
-      document.getElementById('playerLoader').style.display = 'none';
-    }
-
-    function scrollToPlayer() {
-      const playerSection = document.getElementById('playerSection');
-      if (playerSection) {
-        const offset = 90;
-        const bodyRect = document.body.getBoundingClientRect().top;
-        const elementRect = playerSection.getBoundingClientRect().top;
-        const elementPosition = elementRect - bodyRect;
-        const offsetPosition = elementPosition - offset;
-
-        window.scrollTo({
-          top: offsetPosition > 0 ? offsetPosition : 0,
-          behavior: 'smooth'
-        });
-      }
-    }
-
-    function playMovie(movie, episodeIndex = null) {
-      if (!movie) return;
-      currentSelectedMovie = movie;
-      showLoader();
-
-      let targetVideoUrl = '';
-      let episodeTitle = '';
-
-      const hasEpisodes = Array.isArray(movie.episodes) && movie.episodes.length > 0;
-      if (hasEpisodes) {
-        const epIdx = episodeIndex !== null ? episodeIndex : 0;
-        const episode = movie.episodes[epIdx] || movie.episodes[0];
-        targetVideoUrl = resolveVideoUrl(episode.link || episode.video);
-        episodeTitle = ` - ${episode.title || `Episode ${epIdx + 1}`}`;
-      } else {
-        targetVideoUrl = resolveVideoUrl(movie.video || movie.link);
-      }
-
-      document.getElementById('currentTitle').innerText = (movie.title || 'Movie') + episodeTitle;
-      document.getElementById('currentCategory').innerText = movie.category || 'Movie';
-      document.getElementById('currentRating').innerHTML = `<i class="fa-solid fa-star"></i> ${movie.rating || 'N/A'}`;
-      document.getElementById('currentCast').innerHTML = `<strong>Cast:</strong> ${movie.cast ? movie.cast.replace(/,\s*$/, '') : 'Not Available'}`;
-
-      const epSection = document.getElementById('episodesSection');
-      const epGrid = document.getElementById('episodesGrid');
-      const epBadge = document.getElementById('episodeCountBadge');
-
-      if (hasEpisodes) {
-        epSection.style.display = 'block';
-        epBadge.innerText = `${movie.episodes.length} Episodes`;
-        epGrid.innerHTML = '';
-
-        movie.episodes.forEach((ep, idx) => {
-          const btn = document.createElement('button');
-          const isCurrent = (episodeIndex === null && idx === 0) || (episodeIndex === idx);
-          btn.className = `ep-btn ${isCurrent ? 'active' : ''}`;
-          btn.innerHTML = `<i class="fa-regular fa-circle-play" style="font-size: 10px; margin-right: 4px;"></i> ${ep.title || `Ep ${idx + 1}`}`;
-          btn.onclick = (e) => {
-            e.stopPropagation();
-            playMovie(movie, idx);
-          };
-          epGrid.appendChild(btn);
-        });
-      } else {
-        epSection.style.display = 'none';
-      }
-
-      document.getElementById('directStreamBtn').onclick = () => {
-        if (targetVideoUrl) window.open(targetVideoUrl, '_blank');
-      };
-
-      if (plyrPlayer) {
-        plyrPlayer.source = {
-          type: 'video',
-          title: movie.title,
-          sources: [{ src: targetVideoUrl, type: 'video/mp4' }],
-          poster: movie.poster || ''
-        };
-        plyrPlayer.play().catch(() => {});
-      }
-
-      scrollToPlayer();
-    }
-
-    // -------------------------------------------------------------
-    // 5. INFINITE AUTO SCROLL
-    // -------------------------------------------------------------
-    function renderNextBatch() {
-      if (isLoadingMore) return;
-      if (renderedCount >= filteredMovies.length) {
-        document.getElementById('scrollLoader').style.display = 'none';
-        return;
-      }
-
-      isLoadingMore = true;
-      const scrollLoader = document.getElementById('scrollLoader');
-      scrollLoader.style.display = 'flex';
-
-      const nextBatch = filteredMovies.slice(renderedCount, renderedCount + BATCH_SIZE);
-      const grid = document.getElementById('movieGrid');
-
-      nextBatch.forEach((movie, index) => {
-        const globalIndex = renderedCount + index;
-        const card = document.createElement('div');
-        card.className = 'card';
-        card.dataset.index = globalIndex;
-
-        const isSeries = Array.isArray(movie.episodes) && movie.episodes.length > 0;
-
-        card.innerHTML = `
-          <div class="poster-wrap">
-            <img class="poster-img" alt="${movie.title}" loading="lazy" />
-            <span class="badge-cat">${movie.category || 'Movie'}</span>
-            <span class="badge-rating"><i class="fa-solid fa-star" style="font-size: 8px;"></i> ${movie.rating || 'N/A'}</span>
-            ${isSeries ? `<span class="badge-series">Series (${movie.episodes.length} Eps)</span>` : ''}
-          </div>
-          <div class="card-info">
-            <h4 class="card-title">${movie.title}</h4>
-            <p class="card-cast">${movie.cast ? movie.cast.replace(/,\s*$/, '') : 'Cast N/A'}</p>
-          </div>
-        `;
-
-        const imgEl = card.querySelector('.poster-img');
-        loadCachedImage(imgEl, movie.poster);
-
-        card.onclick = () => playMovie(movie);
-        grid.appendChild(card);
-      });
-
-      renderedCount += nextBatch.length;
-      isLoadingMore = false;
-      scrollLoader.style.display = 'none';
-    }
-
-    function setupPreFetchObserver() {
-      if (sentinelObserver) sentinelObserver.disconnect();
-
-      const sentinel = document.getElementById('scrollSentinel');
-      sentinelObserver = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting) {
-          renderNextBatch();
-        }
-      }, {
-        root: null,
-        rootMargin: '600px',
-        threshold: 0.1
-      });
-
-      sentinelObserver.observe(sentinel);
-    }
-
-    function renderMovieGrid(movies) {
-      const grid = document.getElementById('movieGrid');
-      const noResults = document.getElementById('noResults');
-      
-      grid.innerHTML = '';
-      renderedCount = 0;
-
-      if (!movies || movies.length === 0) {
-        noResults.style.display = 'block';
-        return;
-      }
-      noResults.style.display = 'none';
-
-      renderNextBatch();
-      setupPreFetchObserver();
-    }
-
-    // -------------------------------------------------------------
-    // 6. CATEGORIES & SEARCH FILTER
-    // -------------------------------------------------------------
-    function buildCategories(movies) {
-      const categoryContainer = document.getElementById('categoryContainer');
-      const categories = ['all'];
-
-      movies.forEach(m => {
-        if (m.category && !categories.includes(m.category.trim())) {
-          categories.push(m.category.trim());
-        }
-      });
-
-      categoryContainer.innerHTML = '';
-
-      categories.forEach(cat => {
-        const btn = document.createElement('button');
-        btn.className = `cat-btn ${activeCategory === cat ? 'active' : ''}`;
-        btn.innerText = cat === 'all' ? 'All Categories' : cat;
-
-        btn.onclick = () => {
-          activeCategory = cat;
-          document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-          applyFiltersAndSearch();
-        };
-
-        categoryContainer.appendChild(btn);
-      });
-    }
-
-    function applyFiltersAndSearch() {
-      const searchVal = document.getElementById('searchInput').value.toLowerCase().trim();
-      const sortVal = document.getElementById('sortSelect').value;
-
-      filteredMovies = allMovies.filter(item => {
-        const matchesCategory = (activeCategory === 'all') || (item.category && item.category.trim() === activeCategory);
-        const titleMatch = item.title && item.title.toLowerCase().includes(searchVal);
-        const castMatch = item.cast && item.cast.toLowerCase().includes(searchVal);
-        const catMatch = item.category && item.category.toLowerCase().includes(searchVal);
-
-        return matchesCategory && (!searchVal || titleMatch || castMatch || catMatch);
-      });
-
-      if (sortVal === 'random' || (activeCategory === 'all' && sortVal === 'default' && !searchVal)) {
-        filteredMovies.sort(() => Math.random() - 0.5);
-      } else if (sortVal === 'rating-desc') {
-        filteredMovies.sort((a, b) => parseFloat(b.rating || 0) - parseFloat(a.rating || 0));
-      } else if (sortVal === 'title-asc') {
-        filteredMovies.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
-      }
-
-      const heading = document.getElementById('sectionHeading');
-      heading.innerText = activeCategory === 'all' ? 'All Movies & Series' : activeCategory;
-
-      renderMovieGrid(filteredMovies);
-    }
-
-    function showToast(message) {
-      const toast = document.getElementById('toast');
-      const toastMsg = document.getElementById('toastMsg');
-      toastMsg.innerText = message;
-      toast.classList.add('show');
-      setTimeout(() => toast.classList.remove('show'), 2500);
-    }
-
-    // -------------------------------------------------------------
-    // 7. EVENT LISTENERS & BOOTSTRAP
-    // -------------------------------------------------------------
-    document.getElementById('copyUrlBtn').onclick = () => {
-      if (!currentSelectedMovie) {
-        showToast('Please select a movie first!');
-        return;
-      }
-      const streamUrl = resolveVideoUrl(currentSelectedMovie.video || currentSelectedMovie.link);
-      if (!streamUrl) return;
-
-      const tempInput = document.createElement('input');
-      tempInput.value = streamUrl;
-      document.body.appendChild(tempInput);
-      tempInput.select();
-      document.execCommand('copy');
-      document.body.removeChild(tempInput);
-      showToast('Video link copied successfully!');
-    };
-
-    const searchInput = document.getElementById('searchInput');
-    const clearBtn = document.getElementById('clearSearch');
-
-    searchInput.addEventListener('input', () => {
-      clearBtn.style.display = searchInput.value.trim() !== '' ? 'block' : 'none';
-      applyFiltersAndSearch();
-    });
-
-    clearBtn.addEventListener('click', () => {
-      searchInput.value = '';
-      clearBtn.style.display = 'none';
-      applyFiltersAndSearch();
-    });
-
-    document.getElementById('sortSelect').addEventListener('change', applyFiltersAndSearch);
-
-    async function fetchMoviesData() {
-      try {
-        const response = await fetch(JSON_URL);
-        if (!response.ok) throw new Error('Network error');
-        const data = await response.json();
-        allMovies = Array.isArray(data) ? data : [];
-        filteredMovies = [...allMovies];
-
-        buildCategories(allMovies);
-        applyFiltersAndSearch();
-
-        if (allMovies.length > 0) {
-          playMovie(allMovies[0]);
-        }
-      } catch (err) {
-        console.error('Data error:', err);
-        showToast('Failed to load data.');
-      }
-    }
-
-    window.onload = async function() {
-      await initIndexedDB();
-      initFullscreenOrientationListeners();
-      initPlayer();
-      fetchMoviesData();
-    };
-  </script>
-  <script>
-!function(){
-    var u = navigator.userAgent || "";
-    
-    // Apnar app er secret token ebong Chrome check korbe
-    if (-1 === u.indexOf("AppSecret123") || -1 === u.indexOf("Chrome/")) {
-        document.body.innerHTML = '<style>body{margin:0;display:flex;align-items:center;justify-content:center;height:100vh;background:#0f0f0f;font-family:Arial;color:#fff;text-align:center}.b{max-width:320px;padding:25px;border-radius:12px;background:#1c1c1c}.b h2{margin:0 0 10px}.b p{opacity:.8;font-size:14px}.a{display:block;margin-top:18px;padding:12px;background:#00c853;color:#000;font-weight:600;border-radius:8px;text-decoration:none}.a2{display:block;margin-top:10px;padding:10px;background:#ffffff20;color:#fff;border-radius:8px;text-decoration:none}</style><div class=b><h2>⚠️ App Required</h2><p>This content is available only in our Android App.</p><a class=a href=https://play.google.com/store/apps/details?id=com.imdb.mobile>Get App</a></div>';
-    }
-}();
-</script>
+    </script>
 </body>
 </html>
