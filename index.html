@@ -1360,6 +1360,97 @@ window.$RefreshSig$ = () => (type) => type;</script>
 
     <!-- MOVIE CORE APPLICATION JAVASCRIPT -->
     <script>
+        /* ====================================================
+           INDEXEDDB IMAGE CACHING SYSTEM
+           ==================================================== */
+        const DB_NAME = "VDOSkyImageCacheDB";
+        const STORE_NAME = "posterImages";
+        const DB_VERSION = 1;
+
+        function openImageDatabase() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => resolve(request.result);
+                request.onupgradeneeded = (event) => {
+                    const db = event.target.result;
+                    if (!db.objectStoreNames.contains(STORE_NAME)) {
+                        db.createObjectStore(STORE_NAME);
+                    }
+                };
+            });
+        }
+
+        async function getCachedImageFromDB(url) {
+            if (!url) return null;
+            try {
+                const db = await openImageDatabase();
+                return new Promise((resolve) => {
+                    const transaction = db.transaction(STORE_NAME, "readonly");
+                    const store = transaction.objectStore(STORE_NAME);
+                    const request = store.get(url);
+                    request.onsuccess = () => resolve(request.result || null);
+                    request.onerror = () => resolve(null);
+                });
+            } catch (e) {
+                return null;
+            }
+        }
+
+        async function saveImageToDB(url, base64Data) {
+            if (!url || !base64Data) return;
+            try {
+                const db = await openImageDatabase();
+                const transaction = db.transaction(STORE_NAME, "readwrite");
+                const store = transaction.objectStore(STORE_NAME);
+                store.put(base64Data, url);
+            } catch (e) {}
+        }
+
+        // Fetch image URL and convert to Base64 to store in IndexedDB
+        async function fetchAndCachePoster(url) {
+            if (!url) return '';
+            const cached = await getCachedImageFromDB(url);
+            if (cached) return cached;
+
+            try {
+                const response = await fetch(url, { mode: 'cors' });
+                const blob = await response.blob();
+                return new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                        const base64data = reader.result;
+                        saveImageToDB(url, base64data);
+                        resolve(base64data);
+                    };
+                    reader.onerror = () => resolve(url);
+                    reader.readAsDataURL(blob);
+                });
+            } catch (e) {
+                // Fallback to original URL if CORS prevents blob conversion
+                return url;
+            }
+        }
+
+        // Preload and cache all poster images for smooth offline/instant experience
+        async function preloadPostersIntoIndexedDB(movies) {
+            for (let movie of movies) {
+                if (movie.poster && !movie.poster.startsWith('data:')) {
+                    const base64 = await getCachedImageFromDB(movie.poster);
+                    if (!base64) {
+                        fetchAndCachePoster(movie.poster);
+                    }
+                }
+            }
+        }
+
+        // Helper to get image source (IndexedDB cached base64 or original URL)
+        window.getPosterSrc = async function(url) {
+            if (!url) return '';
+            const cached = await getCachedImageFromDB(url);
+            return cached || url;
+        };
+
         // High-speed seed catalog for 0ms initial render with movies and web series
         const SEED_MOVIES = [
             {
@@ -1473,7 +1564,6 @@ window.$RefreshSig$ = () => (type) => type;</script>
            LINK RESOLUTION SYSTEM: CLEANING & SERVER MAPPING
            ==================================================== */
 
-        // Extracts and cleans Google Drive ID by stripping any trailing extra character or word
         function cleanGoogleDriveId(raw) {
             if (!raw) return '';
             let val = String(raw).trim();
@@ -1497,9 +1587,6 @@ window.$RefreshSig$ = () => (type) => type;</script>
                 }
             }
 
-            // Google Drive file IDs are standard 33 characters (e.g. 18f2-h5i1OBj0yQawljfNilHg2UMtiC0).
-            // If user has an extra character or word appended at the end (e.g. 34 characters:
-            // "1DlvdGn8QaXGuJVbeU6wrKxGUJfV-0Txh0" -> strip the trailing character to get 33 chars:
             if (id.length > 33) {
                 id = id.slice(0, 33);
             } else if (id.length === 29) {
@@ -1510,7 +1597,6 @@ window.$RefreshSig$ = () => (type) => type;</script>
         }
         window.cleanGoogleDriveId = cleanGoogleDriveId;
 
-        // Safely extract playable URL from episode string or object
         function extractEpisodeUrl(ep) {
             if (!ep) return '';
             if (typeof ep === 'string') return ep.trim();
@@ -1521,7 +1607,6 @@ window.$RefreshSig$ = () => (type) => type;</script>
         }
         window.extractEpisodeUrl = extractEpisodeUrl;
 
-        // Detect video source and type ('video', 'gdrive', 'yt', or 'drc')
         function detectMovieVideoSource(movie) {
             if (!movie) {
                 return {
@@ -1532,7 +1617,6 @@ window.$RefreshSig$ = () => (type) => type;</script>
                 };
             }
 
-            // Parse episodes if provided as JSON string
             if (typeof movie.episodes === 'string' && movie.episodes.trim().startsWith('[')) {
                 try {
                     movie.episodes = JSON.parse(movie.episodes);
@@ -1558,7 +1642,6 @@ window.$RefreshSig$ = () => (type) => type;</script>
                 activeVideoSource = activeVideoSource.replace('hhttps://', 'https://');
             }
 
-            // 1. Google Drive Preview Links: ONLY when link is https://drive.google.com/file/d/.../preview
             const isDrivePreviewLink = activeVideoSource.startsWith('http') && (
                 (activeVideoSource.includes('drive.google.com') && (activeVideoSource.includes('/preview') || activeVideoSource.includes('/view') || activeVideoSource.includes('/file/d/'))) ||
                 (activeVideoSource.includes('docs.google.com') && activeVideoSource.includes('/preview'))
@@ -1577,7 +1660,6 @@ window.$RefreshSig$ = () => (type) => type;</script>
                 };
             }
 
-            // 1.5 Cloudflare Worker Stream Links (e.g. workers.dev/?id=...)
             if (activeVideoSource.startsWith('http') && activeVideoSource.includes('workers.dev') && activeVideoSource.includes('id=')) {
                 const driveId = cleanGoogleDriveId(activeVideoSource);
                 const workerUrl = `https://debasis.installapkapps.workers.dev/?id=${encodeURIComponent(driveId)}`;
@@ -1590,7 +1672,6 @@ window.$RefreshSig$ = () => (type) => type;</script>
                 };
             }
 
-            // 2. YouTube Video ID or URL
             const rawYt = String(movie.yt || movie.youtube || "").trim();
             if ((!hasEpisodes && rawYt) || activeVideoSource.includes('youtube.com') || activeVideoSource.includes('youtu.be')) {
                 let ytId = (!hasEpisodes && rawYt) ? rawYt : '';
@@ -1609,7 +1690,6 @@ window.$RefreshSig$ = () => (type) => type;</script>
                 };
             }
 
-            // 3. Raw Google Drive file ID (e.g. "1DlvdGn8QaXGuJVbeU6wrKxGUJfV-0Txh0" or 33-char ID)
             if (activeVideoSource && !activeVideoSource.startsWith('http') && /^[-\w]{15,}$/.test(activeVideoSource)) {
                 const driveId = cleanGoogleDriveId(activeVideoSource);
                 const workerUrl = `https://debasis.installapkapps.workers.dev/?id=${encodeURIComponent(driveId)}`;
@@ -1622,7 +1702,6 @@ window.$RefreshSig$ = () => (type) => type;</script>
                 };
             }
 
-            // 4. Direct video URL (MP4, HLS, WebM, etc.)
             if (activeVideoSource && (activeVideoSource.startsWith('http://') || activeVideoSource.startsWith('https://'))) {
                 return {
                     type: 'drc',
@@ -1642,7 +1721,6 @@ window.$RefreshSig$ = () => (type) => type;</script>
                 };
             }
 
-            // Fallback safe sample stream
             return {
                 type: 'video',
                 id: '1DlvdGn8QaXGuJVbeU6wrKxGUJfV-0Txh',
@@ -1652,106 +1730,47 @@ window.$RefreshSig$ = () => (type) => type;</script>
         }
         window.detectMovieVideoSource = detectMovieVideoSource;
 
-        // Generate complete multi-server stream choices for reliable playback
         function getMovieServers(movie) {
             const source = detectMovieVideoSource(movie);
 
-            // Google Drive Preview Links
             if (source.type === 'gdrive') {
                 const driveId = cleanGoogleDriveId(source.id || source.url || source.raw);
                 const previewUrl = driveId ? `https://drive.google.com/file/d/${driveId}/preview` : source.url;
                 const workerUrl = driveId ? `https://debasis.installapkapps.workers.dev/?id=${encodeURIComponent(driveId)}` : '';
                 return [
-                    {
-                        name: "Server 1 (Drive Preview HD)",
-                        quality: "1080p Ultra HD",
-                        url: previewUrl,
-                        type: "gdrive"
-                    },
-                    {
-                        name: "Server 2 (Fast Worker Stream)",
-                        quality: "720p HD",
-                        url: workerUrl || previewUrl,
-                        type: workerUrl ? "video" : "gdrive"
-                    },
-                    {
-                        name: "Server 3 (Drive Direct HD)",
-                        quality: "Auto Quality",
-                        url: driveId ? `https://drive.google.com/uc?export=download&id=${encodeURIComponent(driveId)}` : previewUrl,
-                        type: driveId ? "video" : "gdrive"
-                    }
+                    { name: "Server 1 (Drive Preview HD)", quality: "1080p Ultra HD", url: previewUrl, type: "gdrive" },
+                    { name: "Server 2 (Fast Worker Stream)", quality: "720p HD", url: workerUrl || previewUrl, type: workerUrl ? "video" : "gdrive" },
+                    { name: "Server 3 (Drive Direct HD)", quality: "Auto Quality", url: driveId ? `https://drive.google.com/uc?export=download&id=${encodeURIComponent(driveId)}` : previewUrl, type: driveId ? "video" : "gdrive" }
                 ];
             }
 
-            // YouTube Links
             if (source.type === 'yt') {
                 return [
-                    {
-                        name: "Server 1 (YouTube Cloud HD)",
-                        quality: "Auto / 1080p",
-                        url: `https://www.youtube.com/embed/${source.id}?autoplay=1&enablejsapi=1&playsinline=1&rel=0&modestbranding=1`,
-                        type: "yt"
-                    },
-                    {
-                        name: "Server 2 (YouTube Stream)",
-                        quality: "720p HD",
-                        url: `https://www.youtube-nocookie.com/embed/${source.id}?autoplay=1&enablejsapi=1&playsinline=1&rel=0`,
-                        type: "yt"
-                    }
+                    { name: "Server 1 (YouTube Cloud HD)", quality: "Auto / 1080p", url: `https://www.youtube.com/embed/${source.id}?autoplay=1&enablejsapi=1&playsinline=1&rel=0&modestbranding=1`, type: "yt" },
+                    { name: "Server 2 (YouTube Stream)", quality: "720p HD", url: `https://www.youtube-nocookie.com/embed/${source.id}?autoplay=1&enablejsapi=1&playsinline=1&rel=0`, type: "yt" }
                 ];
             }
 
-            // Raw Google Drive ID (Worker Stream, Drive Preview & Direct Drive)
             if (source.type === 'video') {
                 const driveId = cleanGoogleDriveId(source.id || source.rawId || source.raw);
                 const workerUrl = source.url || `https://debasis.installapkapps.workers.dev/?id=${encodeURIComponent(driveId)}`;
                 const previewUrl = `https://drive.google.com/file/d/${encodeURIComponent(driveId)}/preview`;
                 return [
-                    {
-                        name: "Server 1 (Fast Worker Stream)",
-                        quality: "1080p Ultra HD",
-                        url: workerUrl,
-                        type: "video"
-                    },
-                    {
-                        name: "Server 2 (Drive Preview Mirror)",
-                        quality: "1080p HD",
-                        url: previewUrl,
-                        type: "gdrive"
-                    },
-                    {
-                        name: "Server 3 (Drive Direct HD)",
-                        quality: "720p HD",
-                        url: `https://drive.google.com/uc?export=download&id=${encodeURIComponent(driveId)}`,
-                        type: "video"
-                    }
+                    { name: "Server 1 (Fast Worker Stream)", quality: "1080p Ultra HD", url: workerUrl, type: "video" },
+                    { name: "Server 2 (Drive Preview Mirror)", quality: "1080p HD", url: previewUrl, type: "gdrive" },
+                    { name: "Server 3 (Drive Direct HD)", quality: "720p HD", url: `https://drive.google.com/uc?export=download&id=${encodeURIComponent(driveId)}`, type: "video" }
                 ];
             }
 
-            // Direct MP4 / CDN stream
             return [
-                {
-                    name: "Server 1 (Direct HD Stream)",
-                    quality: "1080p Ultra HD",
-                    url: source.url,
-                    type: "drc"
-                },
-                {
-                    name: "Server 2 (Fast Mirror)",
-                    quality: "720p HD",
-                    url: source.url,
-                    type: "drc"
-                }
+                { name: "Server 1 (Direct HD Stream)", quality: "1080p Ultra HD", url: source.url, type: "drc" },
+                { name: "Server 2 (Fast Mirror)", quality: "720p HD", url: source.url, type: "drc" }
             ];
         }
         window.getMovieServers = getMovieServers;
 
         /* ====================================================
            CONTINUE WATCHING DATA STORE (MAX 10 POSTS)
-           - User opens a post -> added to top
-           - If already present -> moved to top (no duplicate)
-           - Max 10 items -> oldest at the end is deleted
-           - Persisted in localStorage
            ==================================================== */
         const CONTINUE_WATCHING_KEY = 'vdosky_continue_watching';
 
@@ -1762,12 +1781,10 @@ window.$RefreshSig$ = () => (type) => type;</script>
                     const parsed = JSON.parse(raw);
                     if (Array.isArray(parsed) && parsed.length > 0) return parsed;
                 }
-                // Pre-seed with top 3 seed movies on first visit so Continue Watching is immediately visible at top
                 const defaultList = (window.allMovies || allMovies || SEED_MOVIES).slice(0, 3);
                 saveContinueWatchingList(defaultList);
                 return defaultList;
             } catch (e) {
-                console.warn("Failed to load continue watching list:", e);
                 return (window.allMovies || allMovies || SEED_MOVIES).slice(0, 3);
             }
         }
@@ -1775,9 +1792,7 @@ window.$RefreshSig$ = () => (type) => type;</script>
         function saveContinueWatchingList(list) {
             try {
                 localStorage.setItem(CONTINUE_WATCHING_KEY, JSON.stringify(list));
-            } catch (e) {
-                console.warn("Failed to save continue watching list:", e);
-            }
+            } catch (e) {}
         }
 
         function addToContinueWatching(movie) {
@@ -1786,7 +1801,6 @@ window.$RefreshSig$ = () => (type) => type;</script>
                 let list = getContinueWatchingList();
                 const targetKey = String(movie.id || movie.title || '').trim();
 
-                // Remove existing entry if already in list to avoid duplicates
                 list = list.filter(item => {
                     const itemKey = String(item.id || item.title || '').trim();
                     const itemTitle = String(item.title || '').trim().toLowerCase();
@@ -1794,24 +1808,18 @@ window.$RefreshSig$ = () => (type) => type;</script>
                     return itemKey !== targetKey && itemTitle !== movieTitle;
                 });
 
-                // Add newly opened movie to the very front (index 0)
                 list.unshift(movie);
-
-                // Maximum 10 items: delete oldest from end
                 if (list.length > 10) {
                     list = list.slice(0, 10);
                 }
 
                 saveContinueWatchingList(list);
 
-                // Re-render home section if on home view so it updates immediately
                 const homeSection = document.getElementById('homeMovieSection');
                 if (homeSection && homeSection.style.display !== 'none' && typeof renderHomeMovieSection === 'function') {
                     renderHomeMovieSection(allMovies);
                 }
-            } catch (e) {
-                console.error("Error in addToContinueWatching:", e);
-            }
+            } catch (e) {}
         }
 
         window.removeFromContinueWatching = function(encodedMovieId) {
@@ -1822,9 +1830,7 @@ window.$RefreshSig$ = () => (type) => type;</script>
                 saveContinueWatchingList(list);
                 renderHomeMovieSection(allMovies);
                 showToast("Removed from Continue Watching");
-            } catch (e) {
-                console.error("Error removing item:", e);
-            }
+            } catch (e) {}
         };
 
         window.clearContinueWatching = function() {
@@ -1835,7 +1841,6 @@ window.$RefreshSig$ = () => (type) => type;</script>
             } catch (e) {}
         };
 
-        // Download index.html directly to device
         window.triggerDownloadIndex = function(e) {
             if (e) e.preventDefault();
             showToast("Starting download: index.html...");
@@ -1857,7 +1862,6 @@ window.$RefreshSig$ = () => (type) => type;</script>
                     showToast("Downloaded index.html successfully!");
                 })
                 .catch(() => {
-                    // Client-side fallback if server route not reached
                     const fullHtml = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
                     const blob = new Blob([fullHtml], { type: 'text/html; charset=utf-8' });
                     const url = URL.createObjectURL(blob);
@@ -1873,10 +1877,26 @@ window.$RefreshSig$ = () => (type) => type;</script>
         };
 
         /* ====================================================
-           CARD & ROW RENDERING
+           CARD & ROW RENDERING WITH INDEXEDDB IMAGE LOADER
            ==================================================== */
 
-        // Render Continue Watching card HTML with RESUME badge & progress bar
+        // Helper function that dynamically updates image src using IndexedDB cache
+        async function applyCachedImage(imgElement, originalUrl) {
+            if (!imgElement || !originalUrl) return;
+            const cached = await getCachedImageFromDB(originalUrl);
+            if (cached) {
+                imgElement.src = cached;
+            } else {
+                imgElement.src = originalUrl;
+                // Fetch and save for next time
+                fetchAndCachePoster(originalUrl).then(base64 => {
+                    if (base64 && base64.startsWith('data:')) {
+                        imgElement.src = base64;
+                    }
+                });
+            }
+        }
+
         function createContinueWatchingCardHtml(movie, isLatest = false) {
             const title = movie.title || 'Movie';
             const poster = movie.poster || 'https://via.placeholder.com/300x450/111827/ffffff?text=Poster';
@@ -1884,6 +1904,12 @@ window.$RefreshSig$ = () => (type) => type;</script>
             const epCount = movie.episodes && movie.episodes.length > 0 ? movie.episodes.length : (isSeries ? 6 : null);
             const movieJson = encodeURIComponent(JSON.stringify(movie));
             const movieId = movie.id || movie.title || '';
+            const uniqueImgId = 'img_' + Math.random().toString(36).substr(2, 9);
+
+            setTimeout(() => {
+                const imgEl = document.getElementById(uniqueImgId);
+                if (imgEl) applyCachedImage(imgEl, poster);
+            }, 10);
 
             return `
                 <div class="movie-card" onclick="window.playMovieFromData('${movieJson}')">
@@ -1892,7 +1918,7 @@ window.$RefreshSig$ = () => (type) => type;</script>
                             <i class="fa-solid fa-play"></i> RESUME
                         </span>
                         ${epCount ? `<span class="series-badge"><i class="fa-solid fa-list-ol"></i> ${epCount} EP</span>` : ''}
-                        <img src="${poster}" alt="${title}" loading="lazy" onerror="this.src='https://via.placeholder.com/300x450/111827/ffffff?text=Movie';">
+                        <img id="${uniqueImgId}" src="https://via.placeholder.com/300x450/111827/ffffff?text=Loading..." alt="${title}" loading="lazy">
                         <div class="movie-play-overlay">
                             <div class="movie-play-icon" style="background: linear-gradient(135deg, #00d2ff, #0072ff); color: #0b0e14;">
                                 <i class="fa-solid fa-play"></i>
@@ -1916,7 +1942,6 @@ window.$RefreshSig$ = () => (type) => type;</script>
             `;
         }
 
-        // Render card HTML
         function createMovieCardHtml(movie, isNew = false) {
             const title = movie.title || 'Movie';
             const cast = movie.cast ? movie.cast.split(',').slice(0, 2).join(', ') : '';
@@ -1924,8 +1949,13 @@ window.$RefreshSig$ = () => (type) => type;</script>
             const poster = movie.poster || 'https://via.placeholder.com/300x450/111827/ffffff?text=Poster';
             const isSeries = Boolean((movie.episodes && movie.episodes.length > 0) || (movie.category && movie.category.toLowerCase().includes('series')));
             const epCount = movie.episodes && movie.episodes.length > 0 ? movie.episodes.length : (isSeries ? 6 : null);
-
             const movieJson = encodeURIComponent(JSON.stringify(movie));
+            const uniqueImgId = 'img_' + Math.random().toString(36).substr(2, 9);
+
+            setTimeout(() => {
+                const imgEl = document.getElementById(uniqueImgId);
+                if (imgEl) applyCachedImage(imgEl, poster);
+            }, 10);
 
             return `
                 <div class="movie-card" onclick="window.playMovieFromData('${movieJson}')">
@@ -1934,13 +1964,12 @@ window.$RefreshSig$ = () => (type) => type;</script>
                             ${isNew ? '<span class="new-tag">NEW</span>' : ''}★ ${rating}
                         </span>
                         ${epCount ? `<span class="series-badge"><i class="fa-solid fa-list-ol"></i> ${epCount} EP</span>` : ''}
-                        <img src="${poster}" alt="${title}" loading="lazy" onerror="this.src='https://via.placeholder.com/300x450/111827/ffffff?text=Movie';">
+                        <img id="${uniqueImgId}" src="https://via.placeholder.com/300x450/111827/ffffff?text=Loading..." alt="${title}" loading="lazy">
                         <div class="movie-play-overlay">
                             <div class="movie-play-icon">
                                 <i class="fa-solid fa-play"></i>
                             </div>
                         </div>
-                        
                     </div>
                     <div class="movie-title-box">
                         <div class="movie-title" title="${title}">${title}</div>
@@ -1950,7 +1979,6 @@ window.$RefreshSig$ = () => (type) => type;</script>
             `;
         }
 
-        // Render Home Page Movie Section
         function renderHomeMovieSection(movies) {
             const container = document.getElementById('moviesRowsContainer');
             if (!container) return;
@@ -1967,7 +1995,6 @@ window.$RefreshSig$ = () => (type) => type;</script>
 
             let html = '';
 
-            // 1. "Continue Watching" Section (Placed FIRST at the very top of home page)
             const continueList = getContinueWatchingList();
             if (continueList.length > 0) {
                 html += `
@@ -2021,7 +2048,6 @@ window.$RefreshSig$ = () => (type) => type;</script>
                 `;
             }
 
-            // 2. Web Series Row (if any)
             const seriesItems = movies.filter(m => (m.category && m.category.toLowerCase().includes('series')) || (m.episodes && m.episodes.length > 0));
             if (seriesItems.length > 0) {
                 html += `
@@ -2045,7 +2071,6 @@ window.$RefreshSig$ = () => (type) => type;</script>
                 `;
             }
 
-            // 3. Dynamic Categories
             const categories = [...new Set(movies.map(m => m.category).filter(Boolean))];
 
             categories.forEach(cat => {
@@ -2078,7 +2103,6 @@ window.$RefreshSig$ = () => (type) => type;</script>
             container.innerHTML = html;
         }
 
-        // Render Category Filter Pills
         function renderCategoryPills(movies) {
             const bar = document.getElementById('categoryPillsBar');
             if (!bar) return;
@@ -2109,7 +2133,6 @@ window.$RefreshSig$ = () => (type) => type;</script>
             bar.innerHTML = html;
         }
 
-        // Show All / Category Grid View
         window.showAllCategory = function(catName) {
             const homeSection = document.getElementById('homeMovieSection');
             const gridSection = document.getElementById('categoryGridView');
@@ -2157,7 +2180,6 @@ window.$RefreshSig$ = () => (type) => type;</script>
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
 
-        // Go back to home rows
         window.goHome = function() {
             const homeSection = document.getElementById('homeMovieSection');
             const gridSection = document.getElementById('categoryGridView');
@@ -2179,7 +2201,6 @@ window.$RefreshSig$ = () => (type) => type;</script>
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
 
-        // Filter by Category
         window.filterByCategory = function(catName) {
             document.querySelectorAll('.cat-pill').forEach(btn => {
                 btn.classList.toggle('active', btn.textContent.trim().includes(catName));
@@ -2209,7 +2230,6 @@ window.$RefreshSig$ = () => (type) => type;</script>
             if (!videoEl) return;
             const PlyrConstructor = window.Plyr;
             if (!PlyrConstructor) {
-                console.warn("Plyr CDN not loaded, fallback to native controls");
                 videoEl.controls = true;
                 videoEl.play().catch(() => {});
                 return;
@@ -2218,16 +2238,8 @@ window.$RefreshSig$ = () => (type) => type;</script>
             try {
                 window.currentPlyrInstance = new PlyrConstructor(videoEl, {
                     controls: [
-                        'play-large',
-                        'rewind',
-                        'play',
-                        'fast-forward',
-                        'progress',
-                        'current-time',
-                        'duration',
-                        'mute',
-                        'volume',
-                        'fullscreen'
+                        'play-large', 'rewind', 'play', 'fast-forward', 'progress',
+                        'current-time', 'duration', 'mute', 'volume', 'fullscreen'
                     ],
                     seekTime: 10,
                     keyboard: { focused: true, global: false },
@@ -2245,7 +2257,6 @@ window.$RefreshSig$ = () => (type) => type;</script>
                     if (errBox) errBox.style.display = 'flex';
                 });
             } catch (err) {
-                console.error("Error creating Plyr instance:", err);
                 videoEl.controls = true;
             }
         }
@@ -2254,23 +2265,18 @@ window.$RefreshSig$ = () => (type) => type;</script>
            PLAYER & PLAYLIST SYSTEM
            ==================================================== */
 
-        // Play Movie or Series from encoded data
         window.playMovieFromData = function(encodedMovieJson) {
             try {
                 const movie = JSON.parse(decodeURIComponent(encodedMovieJson));
                 window.openPlayer(movie);
-            } catch (e) {
-                console.error("Error launching movie:", e);
-            }
+            } catch (e) {}
         };
 
-        // Open Player Modal
         window.openPlayer = function(movie) {
             currentPlayingMovie = movie;
             currentActiveServer = 0;
             window.currentActiveEpisodeIndex = 0;
 
-            // Automatically add to Continue Watching (Max 10, newest at front, oldest removed)
             addToContinueWatching(movie);
 
             const modal = document.getElementById('playerModal');
@@ -2289,7 +2295,6 @@ window.$RefreshSig$ = () => (type) => type;</script>
             if (ratingEl) ratingEl.textContent = `★ ${movie.rating || '4.8'}`;
             if (catEl) catEl.textContent = movie.category || 'General';
 
-            // Cast pills
             if (castBox) {
                 if (movie.cast) {
                     const stars = movie.cast.split(',').map(s => s.trim()).filter(Boolean);
@@ -2303,13 +2308,9 @@ window.$RefreshSig$ = () => (type) => type;</script>
                 }
             }
 
-            // Parse & render Playlist if Web Series has episodes
             setupWebSeriesPlaylist(movie);
-
-            // Fetch and render stream servers with Plyr
             renderCurrentStream();
 
-            // Related Movies
             if (relatedRow) {
                 const related = allMovies
                     .filter(m => m.category === movie.category && m.title !== movie.title)
@@ -2326,7 +2327,6 @@ window.$RefreshSig$ = () => (type) => type;</script>
             showToast(`Playing: ${title}`);
         };
 
-        // Setup Web Series Playlist UI
         function setupWebSeriesPlaylist(movie) {
             const playlistSection = document.getElementById('playlistSection');
             const episodesBadge = document.getElementById('playerEpisodesCountBadge');
@@ -2337,7 +2337,6 @@ window.$RefreshSig$ = () => (type) => type;</script>
 
             if (!playlistSection) return;
 
-            // Ensure episodes is array if stringified JSON
             if (typeof movie.episodes === 'string' && movie.episodes.trim().startsWith('[')) {
                 try {
                     movie.episodes = JSON.parse(movie.episodes);
@@ -2346,7 +2345,6 @@ window.$RefreshSig$ = () => (type) => type;</script>
 
             const isSeries = Boolean((movie.episodes && movie.episodes.length > 0) || (movie.category && movie.category.toLowerCase().includes('series')));
 
-            // If it's a web series but has no episodes array, synthesize Season 1 playlist so buttons are ALWAYS available
             if (isSeries && (!Array.isArray(movie.episodes) || movie.episodes.length === 0)) {
                 const baseLink = movie.video || movie.url || movie.streamUrl || '1naJKcHY6Jlx2z6zm3fp02mg4uzOviwF8';
                 movie.episodes = [
@@ -2375,7 +2373,6 @@ window.$RefreshSig$ = () => (type) => type;</script>
                     if (filterInput) filterInput.value = '';
                 }
 
-                // Render episode pill buttons
                 if (playlistGrid) {
                     playlistGrid.innerHTML = movie.episodes.map((ep, idx) => {
                         const epTitle = (typeof ep === 'object' && ep ? (ep.title || ep.name) : '') || `Episode ${idx + 1}`;
@@ -2405,7 +2402,6 @@ window.$RefreshSig$ = () => (type) => type;</script>
             }
         }
 
-        // Render current stream and server selector buttons
         function renderCurrentStream() {
             if (!currentPlayingMovie) return;
 
@@ -2414,7 +2410,6 @@ window.$RefreshSig$ = () => (type) => type;</script>
 
             renderPlayerVideo(targetServer);
 
-            // Render Server buttons
             const serversContainer = document.getElementById('serverPillsContainer');
             if (serversContainer) {
                 serversContainer.innerHTML = servers.map((s, idx) => `
@@ -2425,21 +2420,18 @@ window.$RefreshSig$ = () => (type) => type;</script>
             }
         }
 
-        // Render Plyr video element or iframe into player box
         function renderPlayerVideo(source) {
             const videoBox = document.getElementById('videoBoxWrapper');
             if (!videoBox || !source) return;
 
             destroyCurrentPlyr();
 
-            // Direct Video & Worker CDN: initialize Plyr Player!
             if (source.type === 'video' || source.type === 'drc') {
                 videoBox.innerHTML = `
                     <video id="vdoSkyPlyr" class="player" playsinline controls preload="metadata" poster="${currentPlayingMovie?.poster || ''}">
                         <source src="${source.url}" type="video/mp4">
                         Your browser does not support HTML5 video.
                     </video>
-                    <!-- Stream Error Fallback Notice -->
                     <div id="playerStreamErrorNotice" style="display: none; position: absolute; inset: 0; background: rgba(10,12,18,0.94); z-index: 30; flex-direction: column; align-items: center; justify-content: center; padding: 20px; text-align: center;">
                         <i class="fa-solid fa-triangle-exclamation" style="font-size: 34px; color: #ffb703; margin-bottom: 10px;"></i>
                         <h3 style="font-size: 15px; font-weight: bold; margin-bottom: 6px; color: #fff;">Stream Loading Interrupted</h3>
@@ -2456,7 +2448,6 @@ window.$RefreshSig$ = () => (type) => type;</script>
                     initPlyrPlayer(videoEl);
                 }
             } else {
-                // Google Drive Preview or YouTube Embed
                 videoBox.innerHTML = `
                     <iframe id="activePlayerIframe" class="player" src="${source.url}" 
                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen" 
@@ -2467,7 +2458,6 @@ window.$RefreshSig$ = () => (type) => type;</script>
             }
         }
 
-        // Switch Episode in Web Series Playlist
         window.switchEpisode = function(epIdx) {
             if (!currentPlayingMovie || !currentPlayingMovie.episodes) return;
             const episodes = currentPlayingMovie.episodes;
@@ -2479,18 +2469,15 @@ window.$RefreshSig$ = () => (type) => type;</script>
             const targetEp = episodes[epIdx];
             const epTitle = (typeof targetEp === 'object' && targetEp ? (targetEp.title || targetEp.name) : '') || `Episode ${epIdx + 1}`;
 
-            // Update title
             const titleEl = document.getElementById('playerMovieTitle');
             const topTitle = document.getElementById('topBarPlayerTitle');
             const fullTitle = `${currentPlayingMovie.title || 'Series'} - ${epTitle}`;
             if (titleEl) titleEl.textContent = fullTitle;
             if (topTitle) topTitle.textContent = fullTitle;
 
-            // Update Now Playing indicator
             const nowPlayingEl = document.getElementById('playlistNowPlayingTitle');
             if (nowPlayingEl) nowPlayingEl.textContent = epTitle;
 
-            // Update episode pills active state
             const grid = document.getElementById('playlistEpisodesGrid');
             if (grid) {
                 grid.querySelectorAll('.episode-pill-btn').forEach((btn, idx) => {
@@ -2521,7 +2508,6 @@ window.$RefreshSig$ = () => (type) => type;</script>
             showToast(`Playing: ${epTitle}`);
         };
 
-        // Update Prev/Next button states
         function updatePlaylistNavControls() {
             if (!currentPlayingMovie || !currentPlayingMovie.episodes) return;
             const curIdx = window.currentActiveEpisodeIndex || 0;
@@ -2554,7 +2540,6 @@ window.$RefreshSig$ = () => (type) => type;</script>
             }
         };
 
-        // Filter episodes in playlist
         window.filterPlaylistEpisodes = function(query) {
             const q = (query || '').toLowerCase().trim();
             const pills = document.querySelectorAll('#playlistEpisodesGrid .episode-pill-btn');
@@ -2566,7 +2551,6 @@ window.$RefreshSig$ = () => (type) => type;</script>
             });
         };
 
-        // Switch server mirror
         window.switchServer = function(serverIdx) {
             if (!currentPlayingMovie) return;
             currentActiveServer = serverIdx;
@@ -2577,7 +2561,6 @@ window.$RefreshSig$ = () => (type) => type;</script>
                 btn.classList.toggle('active', idx === serverIdx);
             });
 
-            // If already in Plyr and target is also direct video, smoothly switch source
             const plyrVideo = document.getElementById('vdoSkyPlyr');
             if (window.currentPlyrInstance && plyrVideo && (target.type === 'video' || target.type === 'drc')) {
                 window.currentPlyrInstance.source = {
@@ -2594,7 +2577,6 @@ window.$RefreshSig$ = () => (type) => type;</script>
             showToast(`Switched to: ${target.name}`);
         };
 
-        // Close Player Modal
         window.closePlayer = function() {
             destroyCurrentPlyr();
             const modal = document.getElementById('playerModal');
@@ -2604,13 +2586,11 @@ window.$RefreshSig$ = () => (type) => type;</script>
             document.body.style.overflow = '';
             currentPlayingMovie = null;
 
-            // Re-render home section so Continue Watching updates immediately
             if (typeof renderHomeMovieSection === 'function') {
                 renderHomeMovieSection(allMovies);
             }
         };
 
-        // Share Link
         window.shareCurrentMovie = function() {
             if (!currentPlayingMovie) return;
             const shareTitle = currentPlayingMovie.title || 'Movie';
@@ -2704,7 +2684,6 @@ window.$RefreshSig$ = () => (type) => type;</script>
             performSearch(actor);
         };
 
-        // Voice Search (Web Speech API)
         window.startVoiceSearch = function() {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!SpeechRecognition) {
@@ -2756,7 +2735,7 @@ window.$RefreshSig$ = () => (type) => type;</script>
         };
 
         /* ====================================================
-           CATALOG LOADING & AUTO HEALING
+           CATALOG LOADING & AUTO HEALING WITH INDEXEDDB CACHE
            ==================================================== */
         function processCatalogData(items) {
             if (!Array.isArray(items)) return [];
@@ -2768,7 +2747,6 @@ window.$RefreshSig$ = () => (type) => type;</script>
                 const cat = String(item.category || '').toLowerCase();
                 const isSeries = cat.includes('series') || String(item.title || '').toLowerCase().includes('season');
                 
-                // If Web Series and no episodes defined, provide default playlist
                 if (isSeries && (!Array.isArray(eps) || eps.length === 0)) {
                     const baseLink = item.video || item.url || item.streamUrl || item.link || '1naJKcHY6Jlx2z6zm3fp02mg4uzOviwF8';
                     eps = [
@@ -2791,11 +2769,11 @@ window.$RefreshSig$ = () => (type) => type;</script>
         async function loadCatalog() {
             renderHomeMovieSection(allMovies);
             renderCategoryPills(allMovies);
+            preloadPostersIntoIndexedDB(allMovies);
 
             const GITHUB_URL = "https://raw.githubusercontent.com/appcreator05/post/refs/heads/main/8468988.json";
             const LOCAL_CATALOG = "./catalog.json";
 
-            // 1. Load local catalog.json
             try {
                 const res = await fetch(LOCAL_CATALOG);
                 if (res.ok) {
@@ -2805,11 +2783,11 @@ window.$RefreshSig$ = () => (type) => type;</script>
                         window.allMovies = allMovies;
                         renderHomeMovieSection(allMovies);
                         renderCategoryPills(allMovies);
+                        preloadPostersIntoIndexedDB(allMovies);
                     }
                 }
             } catch (e) {}
 
-            // 2. Sync fresh live catalog from GitHub
             try {
                 const res = await fetch(GITHUB_URL + `?_t=${Date.now()}`);
                 if (res.ok) {
@@ -2819,11 +2797,10 @@ window.$RefreshSig$ = () => (type) => type;</script>
                         window.allMovies = allMovies;
                         renderHomeMovieSection(allMovies);
                         renderCategoryPills(allMovies);
+                        preloadPostersIntroIndexedDB = preloadPostersIntoIndexedDB(allMovies);
                     }
                 }
-            } catch (err) {
-                console.warn("Using offline catalog cache.");
-            }
+            } catch (err) {}
         }
 
         document.addEventListener('DOMContentLoaded', () => {
